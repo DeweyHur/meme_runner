@@ -207,14 +207,20 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	# Calculate height for this piece based on terrain type
 	var piece_height = calculate_piece_height(index, total_length, terrain_type)
 	
-	# Create collision shape - ensure it's oriented correctly for ground detection
+	# Calculate heights for adjacent pieces to create smooth slopes
+	var prev_height = piece_height
+	var next_height = piece_height
+	
+	if index > 0:
+		prev_height = calculate_piece_height(index - 1, total_length, terrain_type)
+	if index < total_length - 1:
+		next_height = calculate_piece_height(index + 1, total_length, terrain_type)
+	
+	# Create sloped collision shape
 	var collision = CollisionShape2D.new()
-	var shape = RectangleShape2D.new()
-	shape.size = Vector2(segment_width, ground_height)
+	var shape = create_sloped_collision_shape(prev_height, piece_height, next_height, index, total_length)
 	collision.shape = shape
-	# Position collision shape to match the visual positioning exactly
-	# Visual is at (-segment_width/2, height - ground_height), so collision should be at (0, height - ground_height)
-	collision.position = Vector2(0, piece_height - ground_height)
+	collision.position = Vector2(0, 0)  # Position at piece center
 	ground_piece.add_child(collision)
 	
 	# Create visual representation
@@ -224,10 +230,106 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	# Position the piece
 	ground_piece.position = Vector2(index * segment_width, 0)
 	
+	# Validate piece connection
+	validate_piece_connection(ground_piece, index, total_length, prev_height, piece_height, next_height)
+	
 	# Debug: print collision setup
-	print("Created ground piece %d at height %.1f, collision at %.1f" % [index, piece_height, collision.position.y])
+	print("Created ground piece %d at height %.1f, prev: %.1f, next: %.1f" % [index, piece_height, prev_height, next_height])
 	
 	return ground_piece
+
+func create_sloped_collision_shape(prev_height: float, current_height: float, next_height: float, index: int, total_length: int) -> Shape2D:
+	# Create a sloped collision shape that connects smoothly with adjacent pieces
+	var shape = ConvexPolygonShape2D.new()
+	
+	# Calculate the four corners of the sloped piece
+	var left_x = -segment_width / 2
+	var right_x = segment_width / 2
+	
+	# Calculate the height at the left and right edges of this piece
+	var left_height = current_height
+	var right_height = current_height
+	
+	# For slopes, interpolate between adjacent pieces
+	if index > 0 and index < total_length - 1:
+		# This piece is between two others - create a slope
+		left_height = prev_height
+		right_height = next_height
+	elif index == 0 and total_length > 1:
+		# First piece - slope to next piece
+		right_height = next_height
+	elif index == total_length - 1 and total_length > 1:
+		# Last piece - slope from previous piece
+		left_height = prev_height
+	
+	# Top corners - create the slope
+	var top_left_y = -left_height
+	var top_right_y = -right_height
+	
+	# Bottom corners - extend downward by ground_height
+	var bottom_left_y = -left_height + ground_height
+	var bottom_right_y = -right_height + ground_height
+	
+	# Create the polygon points (clockwise order)
+	var points = [
+		Vector2(left_x, top_left_y),      # Top-left
+		Vector2(right_x, top_right_y),    # Top-right
+		Vector2(right_x, bottom_right_y), # Bottom-right
+		Vector2(left_x, bottom_left_y)    # Bottom-left
+	]
+	
+	shape.points = points
+	return shape
+
+func validate_piece_connection(piece: StaticBody2D, index: int, total_length: int, prev_height: float, current_height: float, next_height: float):
+	# Validate that this piece connects properly with adjacent pieces
+	var tolerance = 1.0  # Allow 1 unit of tolerance
+	
+	# Calculate the actual left and right heights of this piece
+	var left_height = current_height
+	var right_height = current_height
+	
+	if index > 0 and index < total_length - 1:
+		left_height = prev_height
+		right_height = next_height
+	elif index == 0 and total_length > 1:
+		right_height = next_height
+	elif index == total_length - 1 and total_length > 1:
+		left_height = prev_height
+	
+	# Check connection with previous piece (right edge of prev piece should match left edge of this piece)
+	if index > 0:
+		var prev_right_height = prev_height
+		if index == 1:  # Previous piece is the first piece
+			prev_right_height = next_height  # Assuming next_height is the target for the first piece
+		
+		var diff = abs(prev_right_height - left_height)
+		if diff > tolerance:
+			print("WARNING: Piece %d left edge (%.1f) doesn't match previous piece right edge (%.1f). Diff: %.1f" % [index, left_height, prev_right_height, diff])
+		else:
+			print("Piece %d connects properly with previous piece (diff: %.1f)" % [index, diff])
+	
+	# Check connection with next piece (right edge of this piece should match left edge of next piece)
+	if index < total_length - 1:
+		var next_left_height = next_height
+		if index == total_length - 2:  # Next piece is the last piece
+			next_left_height = prev_height  # Assuming prev_height is the source for the last piece
+		
+		var diff = abs(right_height - next_left_height)
+		if diff > tolerance:
+			print("WARNING: Piece %d right edge (%.1f) doesn't match next piece left edge (%.1f). Diff: %.1f" % [index, right_height, next_left_height, diff])
+		else:
+			print("Piece %d connects properly with next piece (diff: %.1f)" % [index, diff])
+	
+	# Calculate and validate the slope angle
+	if abs(right_height - left_height) > 0.1:  # If there's a slope
+		var slope_angle = atan2(abs(right_height - left_height), segment_width)
+		var slope_degrees = slope_angle * 180.0 / PI
+		print("Piece %d slope: %.1f degrees (left: %.1f, right: %.1f)" % [index, slope_degrees, left_height, right_height])
+		
+		# Validate that the slope is reasonable
+		if slope_degrees > 45.0:
+			print("WARNING: Piece %d has steep slope: %.1f degrees" % [index, slope_degrees])
 
 func calculate_piece_height(index: int, total_length: int, terrain_type: String) -> float:
 	var progress = float(index) / float(total_length - 1) if total_length > 1 else 0.0

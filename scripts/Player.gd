@@ -42,21 +42,13 @@ func handle_slope_movement():
 		debug_info["floor_normal_y"] = floor_normal.y
 		debug_info["floor_normal_length"] = floor_normal.length()
 		
-		# Validate floor normal to prevent invalid angles
-		if floor_normal.y < 0.1:  # If floor normal is too horizontal, something is wrong
-			# Force player to fall
-			velocity.y += gravity * 2.0
-			debug_info["slope_type"] = "Invalid (Y < 0.1)"
-			debug_info["invalid_reason"] = "Floor normal Y too low: %.3f" % floor_normal.y
-			return
-		
-		# Additional validation for extreme angles (like 180 degrees)
+		# Check for inverted floor normal (Y < 0) - this indicates upside down collision
 		if floor_normal.y < 0.0:  # Negative Y means upside down or invalid
 			# Force player to fall and reset position
 			velocity.y += gravity * 3.0
-			debug_info["slope_type"] = "Extreme Angle (Y < 0)"
-			debug_info["invalid_reason"] = "Negative floor normal Y: %.3f" % floor_normal.y
-			print("Extreme slope angle detected! Forcing fall...")
+			debug_info["slope_type"] = "Inverted Floor (Y < 0)"
+			debug_info["invalid_reason"] = "Floor normal Y is negative: %.3f" % floor_normal.y
+			print("Inverted floor normal detected! Floor normal: ", floor_normal)
 			return
 		
 		# Check for 180 degree angle (floor normal pointing straight up)
@@ -66,6 +58,14 @@ func handle_slope_movement():
 			print("180° angle detected! Floor normal: ", floor_normal)
 			# Force player to fall
 			velocity.y += gravity * 2.0
+			return
+		
+		# Validate floor normal to prevent invalid angles
+		if floor_normal.y < 0.1:  # If floor normal is too horizontal, something is wrong
+			# Force player to fall
+			velocity.y += gravity * 2.0
+			debug_info["slope_type"] = "Invalid (Y < 0.1)"
+			debug_info["invalid_reason"] = "Floor normal Y too low: %.3f" % floor_normal.y
 			return
 		
 		# If we're on a slope (not flat ground)

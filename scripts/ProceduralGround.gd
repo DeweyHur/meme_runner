@@ -180,6 +180,11 @@ func validate_ground_segment(segment: Node2D, terrain_type: String):
 				if child is CollisionShape2D:
 					# Ensure collision shape is valid
 					if child.shape:
+						# Check if collision position is correct (should be at top surface)
+						var expected_y = piece.position.y - ground_height
+						if abs(child.position.y - expected_y) > 1.0:
+							print("Fixing collision position for piece %d in segment %s" % [i, segment.name])
+							child.position.y = expected_y
 						print("Validated ground piece %d in segment %s" % [i, segment.name])
 
 func create_ground_segment(length: int, terrain_type: String) -> Node2D:
@@ -207,12 +212,13 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	# Calculate height for this piece based on terrain type
 	var piece_height = calculate_piece_height(index, total_length, terrain_type)
 	
-	# Create collision shape
+	# Create collision shape - ensure it's oriented correctly for ground detection
 	var collision = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
 	shape.size = Vector2(segment_width, ground_height)
 	collision.shape = shape
-	collision.position = Vector2(0, piece_height - ground_height/2)
+	# Position collision shape so the top surface is at piece_height
+	collision.position = Vector2(0, piece_height - ground_height)
 	ground_piece.add_child(collision)
 	
 	# Create visual representation
@@ -221,6 +227,9 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	
 	# Position the piece
 	ground_piece.position = Vector2(index * segment_width, 0)
+	
+	# Debug: print collision setup
+	print("Created ground piece %d at height %.1f, collision at %.1f" % [index, piece_height, collision.position.y])
 	
 	return ground_piece
 

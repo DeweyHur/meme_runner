@@ -37,19 +37,35 @@ func handle_slope_movement():
 		debug_info["slope_angle"] = 0.0
 		debug_info["slope_type"] = "Flat"
 		
+		# Store detailed debug info
+		debug_info["floor_normal_x"] = floor_normal.x
+		debug_info["floor_normal_y"] = floor_normal.y
+		debug_info["floor_normal_length"] = floor_normal.length()
+		
 		# Validate floor normal to prevent invalid angles
 		if floor_normal.y < 0.1:  # If floor normal is too horizontal, something is wrong
 			# Force player to fall
 			velocity.y += gravity * 2.0
-			debug_info["slope_type"] = "Invalid"
+			debug_info["slope_type"] = "Invalid (Y < 0.1)"
+			debug_info["invalid_reason"] = "Floor normal Y too low: %.3f" % floor_normal.y
 			return
 		
 		# Additional validation for extreme angles (like 180 degrees)
 		if floor_normal.y < 0.0:  # Negative Y means upside down or invalid
 			# Force player to fall and reset position
 			velocity.y += gravity * 3.0
-			debug_info["slope_type"] = "Extreme Angle"
+			debug_info["slope_type"] = "Extreme Angle (Y < 0)"
+			debug_info["invalid_reason"] = "Negative floor normal Y: %.3f" % floor_normal.y
 			print("Extreme slope angle detected! Forcing fall...")
+			return
+		
+		# Check for 180 degree angle (floor normal pointing straight up)
+		if floor_normal.y > 0.99 and abs(floor_normal.x) < 0.1:
+			debug_info["slope_type"] = "180° Angle Detected"
+			debug_info["invalid_reason"] = "Floor normal pointing up: (%.3f, %.3f)" % [floor_normal.x, floor_normal.y]
+			print("180° angle detected! Floor normal: ", floor_normal)
+			# Force player to fall
+			velocity.y += gravity * 2.0
 			return
 		
 		# If we're on a slope (not flat ground)
@@ -91,6 +107,26 @@ func check_and_unstuck():
 		if debug_info.has("stuck_timer"):
 			debug_info["stuck_timer"] = 0.0
 
+func check_collision_setup():
+	# Check if collision layers are set up correctly
+	debug_info["collision_layer"] = collision_layer
+	debug_info["collision_mask"] = collision_mask
+	
+	# Check if we're detecting ground properly
+	var ground_detected = false
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+		if collider and collider.collision_layer == 1:  # Ground layer
+			ground_detected = true
+			debug_info["ground_collision"] = true
+			debug_info["ground_collider_name"] = collider.name
+			break
+	
+	if not ground_detected:
+		debug_info["ground_collision"] = false
+		debug_info["ground_collider_name"] = "None"
+
 func _physics_process(delta):
 	# Add gravity
 	if not is_on_floor():
@@ -109,6 +145,9 @@ func _physics_process(delta):
 	
 	# Check for stuck player and unstuck if necessary
 	check_and_unstuck()
+	
+	# Check collision setup
+	check_collision_setup()
 	
 	# Handle jumping
 	if Input.is_action_just_pressed("jump") and can_jump and is_on_floor():

@@ -74,7 +74,13 @@ func update_player_debug_info():
 	# Get floor normal if on floor
 	if player.is_on_floor():
 		var floor_normal = player.get_floor_normal()
-		player_info += "Floor Normal: (%.2f, %.2f)\n" % [floor_normal.x, floor_normal.y]
+		player_info += "Floor Normal: (%.3f, %.3f)\n" % [floor_normal.x, floor_normal.y]
+		
+		# Show detailed floor normal info from player debug
+		if player.debug_info.has("floor_normal_x"):
+			player_info += "Debug Normal: (%.3f, %.3f)\n" % [player.debug_info["floor_normal_x"], player.debug_info["floor_normal_y"]]
+		if player.debug_info.has("floor_normal_length"):
+			player_info += "Normal Length: %.3f\n" % player.debug_info["floor_normal_length"]
 		
 		# Calculate slope angle
 		var slope_angle = acos(floor_normal.y)
@@ -84,6 +90,8 @@ func update_player_debug_info():
 		# Show debug info from player
 		if player.debug_info.has("slope_type"):
 			player_info += "Slope Type: %s\n" % player.debug_info["slope_type"]
+		if player.debug_info.has("invalid_reason"):
+			player_info += "Invalid Reason: %s\n" % player.debug_info["invalid_reason"]
 		if player.debug_info.has("slope_velocity"):
 			player_info += "Slope Velocity: %.1f\n" % player.debug_info["slope_velocity"]
 		
@@ -112,6 +120,16 @@ func update_player_debug_info():
 	# Show stuck timer if active
 	if player.debug_info.has("stuck_timer") and player.debug_info["stuck_timer"] > 0.0:
 		player_info += "Stuck Timer: %.1fs\n" % player.debug_info["stuck_timer"]
+	
+	# Show collision setup info
+	if player.debug_info.has("collision_layer"):
+		player_info += "Collision Layer: %d\n" % player.debug_info["collision_layer"]
+	if player.debug_info.has("collision_mask"):
+		player_info += "Collision Mask: %d\n" % player.debug_info["collision_mask"]
+	if player.debug_info.has("ground_collision"):
+		player_info += "Ground Collision: %s\n" % str(player.debug_info["ground_collision"])
+	if player.debug_info.has("ground_collider_name"):
+		player_info += "Ground Collider: %s\n" % player.debug_info["ground_collider_name"]
 	
 	# Update label text
 	player_debug_label.text = player_info

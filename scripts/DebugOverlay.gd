@@ -152,10 +152,58 @@ func update_ground_debug_info():
 		ground_info += "Ground Height at Player: %.1f\n" % ground_height_at_player
 		ground_info += "Player Distance from Ground: %.1f\n" % (player.position.y - ground_height_at_player)
 	
+	# Show detailed segment information
+	ground_info += "\nSegment Details:\n"
+	
+	# Show last 5 segments (most relevant)
+	var segments_to_show = min(5, procedural_ground.segments.size())
+	var start_index = max(0, procedural_ground.segments.size() - segments_to_show)
+	
+	for i in range(start_index, procedural_ground.segments.size()):
+		var segment = procedural_ground.segments[i]
+		ground_info += "Segment %d: %s\n" % [i, segment.name]
+		ground_info += "  Position: (%.1f, %.1f)\n" % [segment.position.x, segment.position.y]
+		ground_info += "  Pieces: %d\n" % segment.get_child_count()
+		
+		# Show piece details for this segment
+		for j in range(min(3, segment.get_child_count())):  # Show first 3 pieces
+			var piece = segment.get_child(j)
+			if piece is StaticBody2D:
+				ground_info += "    Piece %d: (%.1f, %.1f)\n" % [j, piece.position.x, piece.position.y]
+				
+				# Find collision shape
+				for child in piece.get_children():
+					if child is CollisionShape2D:
+						ground_info += "      Collision: (%.1f, %.1f)\n" % [child.position.x, child.position.y]
+						if child.shape and child.shape is RectangleShape2D:
+							var rect = child.shape as RectangleShape2D
+							ground_info += "      Size: (%.1f, %.1f)\n" % [rect.size.x, rect.size.y]
+							# Calculate actual ground Y position
+							var actual_ground_y = segment.position.y + piece.position.y + child.position.y - rect.size.y/2
+							ground_info += "      Ground Y: %.1f\n" % actual_ground_y
+						break
+		
+		# Show terrain type if available
+		if segment.name.contains("uphill"):
+			ground_info += "  Type: Uphill Slope\n"
+		elif segment.name.contains("downhill"):
+			ground_info += "  Type: Downhill Slope\n"
+		elif segment.name.contains("hill"):
+			ground_info += "  Type: Hill\n"
+		elif segment.name.contains("valley"):
+			ground_info += "  Type: Valley\n"
+		elif segment.name.contains("plateau"):
+			ground_info += "  Type: Plateau\n"
+		elif segment.name.contains("bumpy"):
+			ground_info += "  Type: Bumpy\n"
+		else:
+			ground_info += "  Type: Normal\n"
+		
+		ground_info += "\n"
+	
 	# Get current terrain type if available
 	if procedural_ground.segments.size() > 0:
 		var last_segment = procedural_ground.segments[-1]
-		ground_info += "Last Segment Type: %s\n" % last_segment.name
 		
 		# Show height difference info
 		var height_diff = procedural_ground.target_height - procedural_ground.current_height
@@ -169,7 +217,7 @@ func update_ground_debug_info():
 	
 	# Position ground debug label at fixed position (middle-left of screen)
 	var viewport_size = get_viewport().get_visible_rect().size
-	ground_debug_label.position = Vector2(viewport_size.x - 300, 10)
+	ground_debug_label.position = Vector2(viewport_size.x - 400, 10)
 	
 	# Update label text
 	ground_debug_label.text = ground_info 

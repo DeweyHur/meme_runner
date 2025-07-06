@@ -49,15 +49,17 @@ animations = [{
 script = ExtResource("1_0x0x0")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -36)
 shape = SubResource("RectangleShape2D_1")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 modulate = Color(0.2, 0.6, 1, 1)
+position = Vector2(0, -70)
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_jfpux")
 animation = &"run"
 autoplay = "run"
-frame_progress = 0.977575
+frame_progress = 0.873739
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true

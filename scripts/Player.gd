@@ -16,6 +16,10 @@ var can_slide = true
 func _ready():
 	# Set initial position
 	position = Vector2(100, 300)
+	
+	# Make sure we're on the ground
+	if is_on_floor():
+		position.y = 300
 
 func _physics_process(delta):
 	# Add gravity

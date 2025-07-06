@@ -14,6 +14,8 @@ var player_position = 0.0
 @onready var obstacle_timer = $ObstacleSpawner/ObstacleTimer
 @onready var score_label = $UI/ScoreLabel
 @onready var instructions = $UI/Instructions
+@onready var procedural_ground = $ProceduralGround
+@onready var camera = $Camera2D
 
 func _ready():
 	# Connect timer signal
@@ -36,9 +38,13 @@ func _process(delta):
 		# Increase game speed over time
 		game_speed = 1.0 + (score / 1000.0)
 		player.run_speed = 300.0 * game_speed
+		
+		# Update camera to follow player
+		if camera:
+			camera.position.x = player.position.x
 
 func _on_obstacle_timer_timeout():
-	spawn_obstacle()
+	# spawn_obstacle()
 	# Randomize next spawn time
 	obstacle_timer.wait_time = randf_range(min_spawn_time, max_spawn_time)
 

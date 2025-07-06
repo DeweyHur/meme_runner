@@ -58,12 +58,8 @@ func update_player_debug_info():
 	if not player:
 		return
 	
-	# Get player position in screen coordinates
-	var player_screen_pos = get_viewport().get_camera_2d().get_screen_center_position()
-	player_screen_pos.y -= 150  # Position above player
-	
-	# Update label position
-	player_debug_label.position = player_screen_pos
+	# Use fixed position for player debug info (top-right corner)
+	player_debug_label.position = Vector2(10, 50)
 	
 	# Get player information
 	var player_info = ""
@@ -151,9 +147,8 @@ func update_ground_debug_info():
 		else:
 			ground_info += "Status: Jump Required\n"
 	
-	# Position ground debug label at bottom of screen
-	var viewport_size = get_viewport().get_visible_rect().size
-	ground_debug_label.position = Vector2(10, viewport_size.y - 150)
+	# Position ground debug label at fixed position (middle-left of screen)
+	ground_debug_label.position = Vector2(10, 200)
 	
 	# Update label text
 	ground_debug_label.text = ground_info 

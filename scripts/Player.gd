@@ -37,7 +37,7 @@ func handle_slope_movement():
 			var slope_angle = acos(floor_normal.y)
 			
 			# If slope is walkable (less than 45 degrees)
-			if slope_angle < deg_to_rad(45.0):
+			if slope_angle < 0.785398:  # 45 degrees in radians (PI/4)
 				# Adjust velocity to move along the slope
 				var slope_velocity = velocity.x / cos(slope_angle)
 				velocity.y = -slope_velocity * sin(slope_angle)

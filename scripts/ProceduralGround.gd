@@ -190,154 +190,183 @@ func validate_ground_segment(segment: Node2D, terrain_type: String):
 func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	var segment = Node2D.new()
 	segment.name = "GroundSegment_" + str(segments.size())
-	
-	# Create multiple ground pieces for this segment
-	print("Creating %d ground pieces for segment..." % length)
+
+	# Precompute edge heights (N+1 for N pieces)
+	var edge_heights = []
+	for i in range(length + 1):
+		var progress = float(i) / float(length)
+		var edge_height = calculate_edge_height(progress, terrain_type)
+		edge_heights.append(edge_height)
+
+	# Create ground pieces using edge heights
 	for i in range(length):
-		var ground_piece = create_ground_piece(i, length, terrain_type)
+		var ground_piece = create_ground_piece_with_edges(i, length, terrain_type, edge_heights)
 		segment.add_child(ground_piece)
 		print("Added ground piece %d to segment" % i)
-	
+
+	# Validate all piece connections after all pieces are created
+	for i in range(length):
+		var piece = segment.get_child(i)
+		if piece is StaticBody2D:
+			validate_piece_connection(piece, i, length, edge_heights[i], edge_heights[i+1])
+
 	segment.position = Vector2(last_segment_end, 0)
 	add_child(segment)
-	
 	return segment
 
-func create_ground_piece(index: int, total_length: int, terrain_type: String) -> StaticBody2D:
+func calculate_edge_height(progress: float, terrain_type: String) -> float:
+	# Use your existing logic for terrain types, but with progress in [0,1]
+	match terrain_type:
+		"normal":
+			return lerp(float(current_height), float(target_height), smoothness * progress)
+		"uphill":
+			return lerp(float(current_height), float(target_height), progress)
+		"downhill":
+			return lerp(float(current_height), float(target_height), progress)
+		"hill":
+			var hill_factor = 4.0 * progress * (1.0 - progress)
+			return lerp(float(current_height), float(target_height), hill_factor)
+		"valley":
+			var valley_factor = 1.0 - 4.0 * progress * (1.0 - progress)
+			return lerp(float(current_height), float(target_height), valley_factor)
+		"plateau":
+			var plateau_factor = smoothstep(0.2, 0.8, progress)
+			return lerp(float(current_height), float(target_height), plateau_factor)
+		"bumpy":
+			var noise_factor = sin(progress * PI * 2.0) * 0.3
+			return lerp(float(current_height), float(target_height), smoothness * progress) + noise_factor * 30.0
+		_:
+			return lerp(float(current_height), float(target_height), smoothness * progress)
+
+func create_ground_piece_with_edges(index: int, total_length: int, terrain_type: String, edge_heights: Array) -> StaticBody2D:
 	var ground_piece = StaticBody2D.new()
 	ground_piece.name = "GroundPiece_" + str(index)
-	
-	# Set collision layer and mask for ground detection
-	ground_piece.collision_layer = 1  # Layer 1 for ground
-	ground_piece.collision_mask = 0   # Don't detect other objects
-	
-	# Calculate height for this piece based on terrain type
-	var piece_height = calculate_piece_height(index, total_length, terrain_type)
-	
-	# Calculate heights for adjacent pieces to create smooth slopes
-	var prev_height = piece_height
-	var next_height = piece_height
-	
-	if index > 0:
-		prev_height = calculate_piece_height(index - 1, total_length, terrain_type)
-	if index < total_length - 1:
-		next_height = calculate_piece_height(index + 1, total_length, terrain_type)
-	
+	ground_piece.collision_layer = 1
+	ground_piece.collision_mask = 0
+
+	var left_height = edge_heights[index]
+	var right_height = edge_heights[index+1]
+
 	# Create sloped collision shape
 	var collision = CollisionShape2D.new()
-	var shape = create_sloped_collision_shape(prev_height, piece_height, next_height, index, total_length)
+	var shape = create_sloped_collision_shape(left_height, right_height, index, total_length)
 	collision.shape = shape
-	# Position collision shape to match the visual positioning
-	collision.position = Vector2(0, 0)  # Position at piece center
+	collision.position = Vector2(0, 0)
 	ground_piece.add_child(collision)
-	print("Created collision shape for piece %d with %d points" % [index, shape.points.size() if shape is ConvexPolygonShape2D else 0])
-	
+	print("Created collision shape for piece %d with points: %s" % [index, str(shape.points) if shape is ConvexPolygonShape2D else "N/A"])
+
 	# Create visual representation
-	var visual = create_sloped_ground_visual(prev_height, piece_height, next_height, index, total_length, terrain_type)
+	var visual = create_sloped_ground_visual(left_height, right_height, index, total_length, terrain_type)
 	ground_piece.add_child(visual)
-	
-	# Position the piece
+
 	ground_piece.position = Vector2(index * segment_width, 0)
-	
-	# Validate piece connection
-	validate_piece_connection(ground_piece, index, total_length, prev_height, piece_height, next_height)
-	
-	# Debug: print collision setup
-	print("Created ground piece %d at height %.1f, prev: %.1f, next: %.1f" % [index, piece_height, prev_height, next_height])
-	
+	print("Created ground piece %d, left: %.2f, right: %.2f" % [index, left_height, right_height])
 	return ground_piece
 
-func create_sloped_collision_shape(prev_height: float, current_height: float, next_height: float, index: int, total_length: int) -> Shape2D:
-	# Create a sloped collision shape that connects smoothly with adjacent pieces
+func create_sloped_collision_shape(left_height: float, right_height: float, index: int, total_length: int) -> Shape2D:
 	var shape = ConvexPolygonShape2D.new()
-	
-	# Calculate the four corners of the sloped piece
 	var left_x = -segment_width / 2
 	var right_x = segment_width / 2
-	
-	# Calculate the height at the left and right edges of this piece
-	var left_height = current_height
-	var right_height = current_height
-	
-	# For slopes, interpolate between adjacent pieces
-	if index > 0 and index < total_length - 1:
-		# This piece is between two others - create a slope
-		left_height = prev_height
-		right_height = next_height
-	elif index == 0 and total_length > 1:
-		# First piece - slope to next piece
-		right_height = next_height
-	elif index == total_length - 1 and total_length > 1:
-		# Last piece - slope from previous piece
-		left_height = prev_height
-	
-	# Top corners - create the slope
-	var top_left_y = -left_height
-	var top_right_y = -right_height
-	
-	# Bottom corners - extend downward by ground_height
-	var bottom_left_y = -left_height + ground_height
-	var bottom_right_y = -right_height + ground_height
-	
-	# Create the polygon points (clockwise order)
+	var top_left_y = left_height
+	var top_right_y = right_height
+	var bottom_left_y = left_height + ground_height
+	var bottom_right_y = right_height + ground_height
 	var points = [
-		Vector2(left_x, top_left_y),      # Top-left
-		Vector2(right_x, top_right_y),    # Top-right
-		Vector2(right_x, bottom_right_y), # Bottom-right
-		Vector2(left_x, bottom_left_y)    # Bottom-left
+		Vector2(left_x, top_left_y),
+		Vector2(right_x, top_right_y),
+		Vector2(right_x, bottom_right_y),
+		Vector2(left_x, bottom_left_y)
 	]
-	
 	shape.points = points
-	print("Created sloped collision shape with points: %s" % str(points))
 	return shape
 
-func validate_piece_connection(piece: StaticBody2D, index: int, total_length: int, prev_height: float, current_height: float, next_height: float):
-	# Validate that this piece connects properly with adjacent pieces
-	var tolerance = 1.0  # Allow 1 unit of tolerance
-	
-	# Calculate the actual left and right heights of this piece
-	var left_height = current_height
-	var right_height = current_height
-	
-	if index > 0 and index < total_length - 1:
-		left_height = prev_height
-		right_height = next_height
-	elif index == 0 and total_length > 1:
-		right_height = next_height
-	elif index == total_length - 1 and total_length > 1:
-		left_height = prev_height
-	
-	# Check connection with previous piece (right edge of prev piece should match left edge of this piece)
+func create_sloped_ground_visual(left_height: float, right_height: float, index: int, total_length: int, terrain_type: String) -> Node2D:
+	var visual_container = Node2D.new()
+	var left_x = -segment_width / 2
+	var right_x = segment_width / 2
+	var top_left_y = left_height
+	var top_right_y = right_height
+	var bottom_left_y = left_height + ground_height
+	var bottom_right_y = right_height + ground_height
+	var points = [
+		Vector2(left_x, top_left_y),
+		Vector2(right_x, top_right_y),
+		Vector2(right_x, bottom_right_y),
+		Vector2(left_x, bottom_left_y)
+	]
+	var sloped_ground = Polygon2D.new()
+	sloped_ground.polygon = points
+	var avg_height = (left_height + right_height) / 2.0
+	var color = calculate_ground_color(avg_height, terrain_type)
+	sloped_ground.color = color
+	visual_container.add_child(sloped_ground)
+	add_terrain_details(visual_container, avg_height, terrain_type)
+	return visual_container
+
+func validate_piece_connection(piece: StaticBody2D, index: int, total_length: int, left_height: float, right_height: float):
+	var tolerance = 1.0
+	var collision_shape = null
+	for child in piece.get_children():
+		if child is CollisionShape2D:
+			collision_shape = child
+			break
+	if not collision_shape or not collision_shape.shape:
+		print("WARNING: Piece %d has no collision shape!" % index)
+		return
+	var points = []
+	if collision_shape.shape is ConvexPolygonShape2D:
+		var poly = collision_shape.shape as ConvexPolygonShape2D
+		points = poly.points
+		if poly.points.size() >= 4:
+			left_height = poly.points[0].y
+			right_height = poly.points[1].y
+		else:
+			print("WARNING: Piece %d has invalid polygon points!" % index)
+			return
+	else:
+		print("WARNING: Piece %d has non-polygon collision shape!" % index)
+		return
+	print("[DEBUG] Piece %d: left_height=%.2f, right_height=%.2f, points=%s" % [index, left_height, right_height, str(points)])
 	if index > 0:
-		var prev_right_height = prev_height
-		if index == 1:  # Previous piece is the first piece
-			prev_right_height = next_height  # Assuming next_height is the target for the first piece
-		
-		var diff = abs(prev_right_height - left_height)
-		if diff > tolerance:
-			print("WARNING: Piece %d left edge (%.1f) doesn't match previous piece right edge (%.1f). Diff: %.1f" % [index, left_height, prev_right_height, diff])
-		else:
-			print("Piece %d connects properly with previous piece (diff: %.1f)" % [index, diff])
-	
-	# Check connection with next piece (right edge of this piece should match left edge of next piece)
+		var prev_piece = piece.get_parent().get_child(index - 1)
+		if prev_piece and prev_piece is StaticBody2D:
+			var prev_collision_shape = null
+			for child in prev_piece.get_children():
+				if child is CollisionShape2D:
+					prev_collision_shape = child
+					break
+			if prev_collision_shape and prev_collision_shape.shape is ConvexPolygonShape2D:
+				var prev_poly = prev_collision_shape.shape as ConvexPolygonShape2D
+				if prev_poly.points.size() >= 2:
+					var prev_right_height = prev_poly.points[1].y
+					var diff = abs(prev_right_height - left_height)
+					print("[DEBUG] Piece %d: prev_piece right_edge=%.2f, this left_edge=%.2f, diff=%.2f" % [index, prev_right_height, left_height, diff])
+					if diff > tolerance:
+						print("WARNING: Piece %d left edge (%.2f) doesn't match previous piece right edge (%.2f). Diff: %.2f" % [index, left_height, prev_right_height, diff])
+					else:
+						print("Piece %d connects properly with previous piece (diff: %.2f)" % [index, diff])
 	if index < total_length - 1:
-		var next_left_height = next_height
-		if index == total_length - 2:  # Next piece is the last piece
-			next_left_height = prev_height  # Assuming prev_height is the source for the last piece
-		
-		var diff = abs(right_height - next_left_height)
-		if diff > tolerance:
-			print("WARNING: Piece %d right edge (%.1f) doesn't match next piece left edge (%.1f). Diff: %.1f" % [index, right_height, next_left_height, diff])
-		else:
-			print("Piece %d connects properly with next piece (diff: %.1f)" % [index, diff])
-	
-	# Calculate and validate the slope angle
-	if abs(right_height - left_height) > 0.1:  # If there's a slope
+		var next_piece = piece.get_parent().get_child(index + 1)
+		if next_piece and next_piece is StaticBody2D:
+			var next_collision_shape = null
+			for child in next_piece.get_children():
+				if child is CollisionShape2D:
+					next_collision_shape = child
+					break
+			if next_collision_shape and next_collision_shape.shape is ConvexPolygonShape2D:
+				var next_poly = next_collision_shape.shape as ConvexPolygonShape2D
+				if next_poly.points.size() >= 1:
+					var next_left_height = next_poly.points[0].y
+					var diff = abs(right_height - next_left_height)
+					print("[DEBUG] Piece %d: this right_edge=%.2f, next_piece left_edge=%.2f, diff=%.2f" % [index, right_height, next_left_height, diff])
+					if diff > tolerance:
+						print("WARNING: Piece %d right edge (%.2f) doesn't match next piece left edge (%.2f). Diff: %.2f" % [index, right_height, next_left_height, diff])
+					else:
+						print("Piece %d connects properly with next piece (diff: %.2f)" % [index, diff])
+	if abs(right_height - left_height) > 0.1:
 		var slope_angle = atan2(abs(right_height - left_height), segment_width)
 		var slope_degrees = slope_angle * 180.0 / PI
 		print("Piece %d slope: %.1f degrees (left: %.1f, right: %.1f)" % [index, slope_degrees, left_height, right_height])
-		
-		# Validate that the slope is reasonable
 		if slope_degrees > 45.0:
 			print("WARNING: Piece %d has steep slope: %.1f degrees" % [index, slope_degrees])
 
@@ -371,58 +400,6 @@ func calculate_piece_height(index: int, total_length: int, terrain_type: String)
 			return lerp(float(current_height), float(target_height), smoothness * progress) + noise_factor * 30.0
 		_:
 			return lerp(float(current_height), float(target_height), smoothness * progress)
-
-func create_sloped_ground_visual(prev_height: float, current_height: float, next_height: float, index: int, total_length: int, terrain_type: String) -> Node2D:
-	var visual_container = Node2D.new()
-	
-	# Calculate the height at the left and right edges of this piece (same logic as collision)
-	var left_height = current_height
-	var right_height = current_height
-	
-	if index > 0 and index < total_length - 1:
-		left_height = prev_height
-		right_height = next_height
-	elif index == 0 and total_length > 1:
-		right_height = next_height
-	elif index == total_length - 1 and total_length > 1:
-		left_height = prev_height
-	
-	# Create sloped ground using Polygon2D
-	var sloped_ground = Polygon2D.new()
-	
-	# Calculate the four corners of the sloped piece
-	var left_x = -segment_width / 2
-	var right_x = segment_width / 2
-	
-	# Top corners - create the slope
-	var top_left_y = -left_height
-	var top_right_y = -right_height
-	
-	# Bottom corners - extend downward by ground_height
-	var bottom_left_y = -left_height + ground_height
-	var bottom_right_y = -right_height + ground_height
-	
-	# Create the polygon points (clockwise order)
-	var points = [
-		Vector2(left_x, top_left_y),      # Top-left
-		Vector2(right_x, top_right_y),    # Top-right
-		Vector2(right_x, bottom_right_y), # Bottom-right
-		Vector2(left_x, bottom_left_y)    # Bottom-left
-	]
-	
-	sloped_ground.polygon = points
-	
-	# Set color based on average height and terrain type
-	var avg_height = (left_height + right_height) / 2.0
-	var color = calculate_ground_color(avg_height, terrain_type)
-	sloped_ground.color = color
-	
-	visual_container.add_child(sloped_ground)
-	
-	# Add terrain-specific visual details at the center
-	add_terrain_details(visual_container, avg_height, terrain_type)
-	
-	return visual_container
 
 func create_ground_visual(height: float, terrain_type: String) -> Node2D:
 	var visual_container = Node2D.new()

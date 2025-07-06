@@ -152,40 +152,39 @@ func draw_ground_piece_collision(piece: StaticBody2D, segment_position: Vector2)
 		add_child(collision_line)
 		collision_lines.append(collision_line)
 		
-		# Draw collision box
-		var points = []
-		if collision_shape.shape is RectangleShape2D:
-			var rect = collision_shape.shape as RectangleShape2D
-			var size = rect.size
-			var pos = segment_position + piece.position + collision_shape.position
-			
-			# Create rectangle points
-			points = [
-				pos + Vector2(-size.x/2, -size.y/2),  # Top-left
-				pos + Vector2(size.x/2, -size.y/2),   # Top-right
-				pos + Vector2(size.x/2, size.y/2),    # Bottom-right
-				pos + Vector2(-size.x/2, size.y/2),   # Bottom-left
-				pos + Vector2(-size.x/2, -size.y/2)   # Back to start
-			]
-			
+		# Draw collision polygon (ConvexPolygonShape2D)
+		if collision_shape.shape is ConvexPolygonShape2D:
+			var poly = collision_shape.shape as ConvexPolygonShape2D
+			var points = []
+			for p in poly.points:
+				points.append(segment_position + piece.position + collision_shape.position + p)
+			# Close the polygon
+			if points.size() > 0:
+				points.append(points[0])
 			collision_line.points = points
 			
-			# Draw normal vector (pointing upward from top surface)
-			var normal_line = Line2D.new()
-			normal_line.width = 2.0
-			normal_line.default_color = Color.BLUE
-			normal_line.z_index = 51
-			add_child(normal_line)
-			normal_lines.append(normal_line)
-			
-			var normal_start = pos + Vector2(0, -size.y/2)  # Top center of collision box
-			var normal_end = normal_start + Vector2(0, -30.0)  # 30 pixel upward normal
-			
-			normal_line.points = [normal_start, normal_end]
-			
-			# Add arrowhead to normal
-			var arrow_points = create_arrowhead(normal_start, normal_end, 8.0)
-			normal_line.points.append_array(arrow_points)
+			# Draw normal at the center of the top edge (between first two points)
+			if points.size() >= 2:
+				var top_left = points[0]
+				var top_right = points[1]
+				var edge_center = (top_left + top_right) / 2.0
+				var edge_dir = (top_right - top_left).normalized()
+				var normal = Vector2(-edge_dir.y, edge_dir.x).normalized()  # Perpendicular
+				# Ensure normal points "upward" (away from ground)
+				if normal.y > 0:
+					normal = -normal
+				var normal_end = edge_center + normal * 30.0
+				
+				var normal_line = Line2D.new()
+				normal_line.width = 2.0
+				normal_line.default_color = Color.BLUE
+				normal_line.z_index = 51
+				add_child(normal_line)
+				normal_lines.append(normal_line)
+				normal_line.points = [edge_center, normal_end]
+				# Add arrowhead
+				var arrow_points = create_arrowhead(edge_center, normal_end, 8.0)
+				normal_line.points.append_array(arrow_points)
 
 func create_arrowhead(start: Vector2, end: Vector2, size: float) -> Array[Vector2]:
 	var direction = (end - start).normalized()

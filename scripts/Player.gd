@@ -53,11 +53,11 @@ func handle_slope_movement():
 		
 		# Check for 180 degree angle (floor normal pointing straight down)
 		if floor_normal.y < -0.99 and abs(floor_normal.x) < 0.1:
-			debug_info["slope_type"] = "180° Angle Detected"
-			debug_info["invalid_reason"] = "Floor normal pointing down: (%.3f, %.3f)" % [floor_normal.x, floor_normal.y]
-			print("180° angle detected! Floor normal: ", floor_normal)
-			# Force player to fall
-			velocity.y += gravity * 2.0
+			# This is actually flat ground, not a 180° angle
+			# The normal pointing down (-1, 0) is correct for flat ground
+			debug_info["slope_type"] = "Flat Ground"
+			debug_info["slope_angle"] = 0.0
+			# Don't force fall - this is normal behavior
 			return
 		
 		# Validate floor normal to prevent invalid angles
@@ -69,18 +69,27 @@ func handle_slope_movement():
 			return
 		
 		# If we're on a slope (not flat ground)
-		if floor_normal.y > -0.9:  # Greater than -0.9 means we're on a slope
+		# Check if the normal has a significant X component (indicating slope)
+		if abs(floor_normal.x) > 0.1:  # Significant horizontal component means slope
 			# Calculate slope angle (use absolute value since normal is negative)
 			var slope_angle = acos(abs(floor_normal.y))
 			debug_info["slope_angle"] = slope_angle
 			
 			# If slope is walkable (less than 45 degrees)
 			if slope_angle < 0.785398:  # 45 degrees in radians (PI/4)
+				# Calculate the slope direction (positive = uphill, negative = downhill)
+				var slope_direction = -floor_normal.x  # Negative because normal points away from surface
+				
 				# Adjust velocity to move along the slope
-				var slope_velocity = velocity.x / cos(slope_angle)
-				velocity.y = -slope_velocity * sin(slope_angle)
+				# For uphill: reduce horizontal speed, add upward velocity
+				# For downhill: maintain horizontal speed, add downward velocity
+				if slope_direction > 0:  # Uphill
+					velocity.y = -velocity.x * slope_direction * 0.5
+				else:  # Downhill
+					velocity.y = -velocity.x * slope_direction * 0.3
+				
 				debug_info["slope_type"] = "Walkable"
-				debug_info["slope_velocity"] = slope_velocity
+				debug_info["slope_direction"] = slope_direction
 			else:
 				# Too steep, slide down
 				velocity.y += gravity * 0.5

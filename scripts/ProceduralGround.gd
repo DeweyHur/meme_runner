@@ -220,11 +220,12 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	var collision = CollisionShape2D.new()
 	var shape = create_sloped_collision_shape(prev_height, piece_height, next_height, index, total_length)
 	collision.shape = shape
+	# Position collision shape to match the visual positioning
 	collision.position = Vector2(0, 0)  # Position at piece center
 	ground_piece.add_child(collision)
 	
 	# Create visual representation
-	var visual = create_ground_visual(piece_height, terrain_type)
+	var visual = create_sloped_ground_visual(prev_height, piece_height, next_height, index, total_length, terrain_type)
 	ground_piece.add_child(visual)
 	
 	# Position the piece
@@ -361,6 +362,58 @@ func calculate_piece_height(index: int, total_length: int, terrain_type: String)
 			return lerp(float(current_height), float(target_height), smoothness * progress) + noise_factor * 30.0
 		_:
 			return lerp(float(current_height), float(target_height), smoothness * progress)
+
+func create_sloped_ground_visual(prev_height: float, current_height: float, next_height: float, index: int, total_length: int, terrain_type: String) -> Node2D:
+	var visual_container = Node2D.new()
+	
+	# Calculate the height at the left and right edges of this piece (same logic as collision)
+	var left_height = current_height
+	var right_height = current_height
+	
+	if index > 0 and index < total_length - 1:
+		left_height = prev_height
+		right_height = next_height
+	elif index == 0 and total_length > 1:
+		right_height = next_height
+	elif index == total_length - 1 and total_length > 1:
+		left_height = prev_height
+	
+	# Create sloped ground using Polygon2D
+	var sloped_ground = Polygon2D.new()
+	
+	# Calculate the four corners of the sloped piece
+	var left_x = -segment_width / 2
+	var right_x = segment_width / 2
+	
+	# Top corners - create the slope
+	var top_left_y = -left_height
+	var top_right_y = -right_height
+	
+	# Bottom corners - extend downward by ground_height
+	var bottom_left_y = -left_height + ground_height
+	var bottom_right_y = -right_height + ground_height
+	
+	# Create the polygon points (clockwise order)
+	var points = [
+		Vector2(left_x, top_left_y),      # Top-left
+		Vector2(right_x, top_right_y),    # Top-right
+		Vector2(right_x, bottom_right_y), # Bottom-right
+		Vector2(left_x, bottom_left_y)    # Bottom-left
+	]
+	
+	sloped_ground.polygon = points
+	
+	# Set color based on average height and terrain type
+	var avg_height = (left_height + right_height) / 2.0
+	var color = calculate_ground_color(avg_height, terrain_type)
+	sloped_ground.color = color
+	
+	visual_container.add_child(sloped_ground)
+	
+	# Add terrain-specific visual details at the center
+	add_terrain_details(visual_container, avg_height, terrain_type)
+	
+	return visual_container
 
 func create_ground_visual(height: float, terrain_type: String) -> Node2D:
 	var visual_container = Node2D.new()

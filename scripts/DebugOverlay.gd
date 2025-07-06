@@ -113,6 +113,10 @@ func update_player_debug_info():
 	
 	player_info += "Obstacle Collision: %s\n" % str(obstacle_collision)
 	
+	# Show stuck timer if active
+	if player.debug_info.has("stuck_timer") and player.debug_info["stuck_timer"] > 0.0:
+		player_info += "Stuck Timer: %.1fs\n" % player.debug_info["stuck_timer"]
+	
 	# Update label text
 	player_debug_label.text = player_info
 

@@ -9,7 +9,7 @@ extends Node2D
 @export var terrain_complexity = 0.7  # How complex the terrain should be
 @export var max_walkable_slope = 25.0  # Maximum slope angle in degrees that player can walk up
 @export var slope_segment_length = 6  # How many segments to use for gradual slopes
-@export var walkable_height_threshold = 30.0  # Height difference threshold for walkable slopes
+@export var walkable_height_threshold = 120.0  # Height difference threshold for walkable slopes
 
 var player: Node2D
 var last_segment_end = 0.0

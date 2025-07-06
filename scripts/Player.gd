@@ -37,6 +37,13 @@ func handle_slope_movement():
 		debug_info["slope_angle"] = 0.0
 		debug_info["slope_type"] = "Flat"
 		
+		# Validate floor normal to prevent invalid angles
+		if floor_normal.y < 0.1:  # If floor normal is too horizontal, something is wrong
+			# Force player to fall
+			velocity.y += gravity * 2.0
+			debug_info["slope_type"] = "Invalid"
+			return
+		
 		# If we're on a slope (not flat ground)
 		if floor_normal.y < 0.9:  # Less than 0.9 means we're on a slope
 			# Calculate slope angle
@@ -57,6 +64,25 @@ func handle_slope_movement():
 		else:
 			debug_info["slope_type"] = "Flat"
 
+func check_and_unstuck():
+	# If player is on floor but has very low velocity, they might be stuck
+	if is_on_floor() and abs(velocity.x) < 50.0 and abs(velocity.y) < 10.0:
+		# Check if we're stuck for too long
+		if not debug_info.has("stuck_timer"):
+			debug_info["stuck_timer"] = 0.0
+		
+		debug_info["stuck_timer"] += get_process_delta_time()
+		
+		# If stuck for more than 1 second, force movement
+		if debug_info["stuck_timer"] > 1.0:
+			print("Player stuck detected! Forcing movement...")
+			velocity.y = -100.0  # Force upward movement
+			debug_info["stuck_timer"] = 0.0
+	else:
+		# Reset stuck timer if moving normally
+		if debug_info.has("stuck_timer"):
+			debug_info["stuck_timer"] = 0.0
+
 func _physics_process(delta):
 	# Add gravity
 	if not is_on_floor():
@@ -72,6 +98,9 @@ func _physics_process(delta):
 	
 	# Handle slope movement
 	handle_slope_movement()
+	
+	# Check for stuck player and unstuck if necessary
+	check_and_unstuck()
 	
 	# Handle jumping
 	if Input.is_action_just_pressed("jump") and can_jump and is_on_floor():

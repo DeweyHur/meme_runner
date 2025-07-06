@@ -6,8 +6,10 @@ This system creates dynamic, procedurally generated terrain for the meme runner 
 
 ### Terrain Types
 - **Normal**: Standard terrain with gentle height variations
-- **Hills**: Elevated terrain with parabolic hill shapes
-- **Valleys**: Lowered terrain with inverted parabolic valley shapes
+- **Uphill**: Gradual upward slopes that players can walk up without jumping
+- **Downhill**: Gradual downward slopes that players can walk down without jumping
+- **Hills**: Elevated terrain with parabolic hill shapes (require jumping)
+- **Valleys**: Lowered terrain with inverted parabolic valley shapes (require jumping)
 - **Plateaus**: Flat terrain with smooth edges
 - **Bumpy**: Terrain with noise-based height variations
 
@@ -32,6 +34,8 @@ The `ProceduralGround.gd` script has several export variables you can adjust:
 - `max_segment_length`: Maximum number of pieces per segment (default: 8)
 - `smoothness`: How smooth transitions are (0-1, default: 0.3)
 - `terrain_complexity`: Overall complexity of terrain (default: 0.7)
+- `max_walkable_slope`: Maximum slope angle in degrees that player can walk up (default: 30.0)
+- `slope_segment_length`: How many segments to use for gradual slopes (default: 4)
 
 ## How It Works
 
@@ -39,8 +43,17 @@ The `ProceduralGround.gd` script has several export variables you can adjust:
 2. **Dynamic Generation**: Monitors player position and generates new segments when needed
 3. **Terrain Selection**: Randomly chooses terrain types with weighted probabilities
 4. **Height Calculation**: Uses different algorithms for each terrain type
-5. **Visual Creation**: Generates collision shapes and visual elements
-6. **Cleanup**: Removes old segments to maintain performance
+5. **Slope Generation**: Creates walkable slopes with gradual height changes
+6. **Visual Creation**: Generates collision shapes and visual elements
+7. **Cleanup**: Removes old segments to maintain performance
+
+## Walkable Slopes
+
+The system now includes **uphill** and **downhill** slopes that players can traverse without jumping:
+- **Gradual Inclines**: Smooth upward slopes that don't require jumping
+- **Gradual Declines**: Smooth downward slopes that don't require jumping
+- **Configurable Angle**: Adjust `max_walkable_slope` to control maximum walkable angle
+- **Smooth Transitions**: Slopes use longer segments for gradual height changes
 
 ## Usage
 

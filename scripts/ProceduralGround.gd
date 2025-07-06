@@ -7,8 +7,8 @@ extends Node2D
 @export var max_segment_length = 8
 @export var smoothness = 0.3  # How smooth the transitions are (0-1)
 @export var terrain_complexity = 0.7  # How complex the terrain should be
-@export var max_walkable_slope = 30.0  # Maximum slope angle in degrees that player can walk up
-@export var slope_segment_length = 4  # How many segments to use for gradual slopes
+@export var max_walkable_slope = 25.0  # Maximum slope angle in degrees that player can walk up
+@export var slope_segment_length = 6  # How many segments to use for gradual slopes
 
 var player: Node2D
 var last_segment_end = 0.0
@@ -146,6 +146,10 @@ func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 func create_ground_piece(index: int, total_length: int, terrain_type: String) -> StaticBody2D:
 	var ground_piece = StaticBody2D.new()
 	ground_piece.name = "GroundPiece_" + str(index)
+	
+	# Set collision layer and mask for ground detection
+	ground_piece.collision_layer = 1  # Layer 1 for ground
+	ground_piece.collision_mask = 0   # Don't detect other objects
 	
 	# Calculate height for this piece based on terrain type
 	var piece_height = calculate_piece_height(index, total_length, terrain_type)

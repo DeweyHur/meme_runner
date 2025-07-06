@@ -59,7 +59,7 @@ scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_jfpux")
 animation = &"run"
 autoplay = "run"
-frame_progress = 0.0513972
+frame_progress = 0.213959
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true

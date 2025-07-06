@@ -17,9 +17,33 @@ func _ready():
 	# Set initial position
 	position = Vector2(100, 300)
 	
+	# Set collision layers for proper ground detection
+	collision_layer = 2  # Player layer
+	collision_mask = 1   # Detect ground layer
+	
 	# Make sure we're on the ground
 	if is_on_floor():
 		position.y = 300
+
+func handle_slope_movement():
+	# If on floor, check if we're on a slope and adjust movement
+	if is_on_floor():
+		# Get the floor normal to determine slope direction
+		var floor_normal = get_floor_normal()
+		
+		# If we're on a slope (not flat ground)
+		if floor_normal.y < 0.9:  # Less than 0.9 means we're on a slope
+			# Calculate slope angle
+			var slope_angle = acos(floor_normal.y)
+			
+			# If slope is walkable (less than 45 degrees)
+			if slope_angle < deg_to_rad(45.0):
+				# Adjust velocity to move along the slope
+				var slope_velocity = velocity.x / cos(slope_angle)
+				velocity.y = -slope_velocity * sin(slope_angle)
+			else:
+				# Too steep, slide down
+				velocity.y += gravity * 0.5
 
 func _physics_process(delta):
 	# Add gravity
@@ -33,6 +57,9 @@ func _physics_process(delta):
 
 	# Handle running
 	velocity.x = run_speed
+	
+	# Handle slope movement
+	handle_slope_movement()
 	
 	# Handle jumping
 	if Input.is_action_just_pressed("jump") and can_jump and is_on_floor():
@@ -95,6 +122,7 @@ func check_collisions():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		
+		# Only trigger game over for obstacles, not ground
 		if collider.is_in_group("obstacles"):
 			game_over()
 

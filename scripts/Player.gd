@@ -42,36 +42,36 @@ func handle_slope_movement():
 		debug_info["floor_normal_y"] = floor_normal.y
 		debug_info["floor_normal_length"] = floor_normal.length()
 		
-		# Check for inverted floor normal (Y < 0) - this indicates upside down collision
-		if floor_normal.y < 0.0:  # Negative Y means upside down or invalid
+		# Check for inverted floor normal (Y > 0) - this indicates upside down collision
+		if floor_normal.y > 0.0:  # Positive Y means upside down or invalid
 			# Force player to fall and reset position
 			velocity.y += gravity * 3.0
-			debug_info["slope_type"] = "Inverted Floor (Y < 0)"
-			debug_info["invalid_reason"] = "Floor normal Y is negative: %.3f" % floor_normal.y
+			debug_info["slope_type"] = "Inverted Floor (Y > 0)"
+			debug_info["invalid_reason"] = "Floor normal Y is positive: %.3f" % floor_normal.y
 			print("Inverted floor normal detected! Floor normal: ", floor_normal)
 			return
 		
-		# Check for 180 degree angle (floor normal pointing straight up)
-		if floor_normal.y > 0.99 and abs(floor_normal.x) < 0.1:
+		# Check for 180 degree angle (floor normal pointing straight down)
+		if floor_normal.y < -0.99 and abs(floor_normal.x) < 0.1:
 			debug_info["slope_type"] = "180° Angle Detected"
-			debug_info["invalid_reason"] = "Floor normal pointing up: (%.3f, %.3f)" % [floor_normal.x, floor_normal.y]
+			debug_info["invalid_reason"] = "Floor normal pointing down: (%.3f, %.3f)" % [floor_normal.x, floor_normal.y]
 			print("180° angle detected! Floor normal: ", floor_normal)
 			# Force player to fall
 			velocity.y += gravity * 2.0
 			return
 		
 		# Validate floor normal to prevent invalid angles
-		if floor_normal.y < 0.1:  # If floor normal is too horizontal, something is wrong
+		if floor_normal.y > -0.1:  # If floor normal is too horizontal, something is wrong
 			# Force player to fall
 			velocity.y += gravity * 2.0
-			debug_info["slope_type"] = "Invalid (Y < 0.1)"
-			debug_info["invalid_reason"] = "Floor normal Y too low: %.3f" % floor_normal.y
+			debug_info["slope_type"] = "Invalid (Y > -0.1)"
+			debug_info["invalid_reason"] = "Floor normal Y too high: %.3f" % floor_normal.y
 			return
 		
 		# If we're on a slope (not flat ground)
-		if floor_normal.y < 0.9:  # Less than 0.9 means we're on a slope
-			# Calculate slope angle
-			var slope_angle = acos(floor_normal.y)
+		if floor_normal.y > -0.9:  # Greater than -0.9 means we're on a slope
+			# Calculate slope angle (use absolute value since normal is negative)
+			var slope_angle = acos(abs(floor_normal.y))
 			debug_info["slope_angle"] = slope_angle
 			
 			# If slope is walkable (less than 45 degrees)

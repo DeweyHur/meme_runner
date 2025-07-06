@@ -45,8 +45,11 @@ func _process(delta):
 
 func generate_initial_ground():
 	# Generate a few segments to start
+	print("Generating initial ground...")
 	for i in range(5):
+		print("Generating segment %d..." % i)
 		generate_next_segment()
+	print("Initial ground generation complete. Segments: %d" % segments.size())
 
 func generate_next_segment():
 	# Generate terrain type first
@@ -83,12 +86,14 @@ func generate_next_segment():
 		segment_length = slope_segment_length
 	
 	# Create the segment
+	print("Creating segment with length %d, terrain type: %s" % [segment_length, terrain_type])
 	var segment = create_ground_segment(segment_length, terrain_type)
 	
 	# Validate the segment
 	validate_ground_segment(segment, terrain_type)
 	
 	segments.append(segment)
+	print("Segment created and added. Total segments: %d" % segments.size())
 	
 	# Update positions
 	last_segment_end += segment_width * float(segment_length)
@@ -187,9 +192,11 @@ func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	segment.name = "GroundSegment_" + str(segments.size())
 	
 	# Create multiple ground pieces for this segment
+	print("Creating %d ground pieces for segment..." % length)
 	for i in range(length):
 		var ground_piece = create_ground_piece(i, length, terrain_type)
 		segment.add_child(ground_piece)
+		print("Added ground piece %d to segment" % i)
 	
 	segment.position = Vector2(last_segment_end, 0)
 	add_child(segment)
@@ -223,6 +230,7 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	# Position collision shape to match the visual positioning
 	collision.position = Vector2(0, 0)  # Position at piece center
 	ground_piece.add_child(collision)
+	print("Created collision shape for piece %d with %d points" % [index, shape.points.size() if shape is ConvexPolygonShape2D else 0])
 	
 	# Create visual representation
 	var visual = create_sloped_ground_visual(prev_height, piece_height, next_height, index, total_length, terrain_type)
@@ -280,6 +288,7 @@ func create_sloped_collision_shape(prev_height: float, current_height: float, ne
 	]
 	
 	shape.points = points
+	print("Created sloped collision shape with points: %s" % str(points))
 	return shape
 
 func validate_piece_connection(piece: StaticBody2D, index: int, total_length: int, prev_height: float, current_height: float, next_height: float):

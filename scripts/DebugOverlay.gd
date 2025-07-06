@@ -179,7 +179,7 @@ func update_ground_debug_info():
 							var rect = child.shape as RectangleShape2D
 							ground_info += "      Size: (%.1f, %.1f)\n" % [rect.size.x, rect.size.y]
 							# Calculate actual ground Y position
-							var actual_ground_y = segment.position.y + piece.position.y + child.position.y - rect.size.y/2
+							var actual_ground_y = segment.position.y + piece.position.y + child.position.y
 							ground_info += "      Ground Y: %.1f\n" % actual_ground_y
 						break
 		

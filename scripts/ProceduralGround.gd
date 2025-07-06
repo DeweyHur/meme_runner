@@ -212,9 +212,9 @@ func create_ground_piece(index: int, total_length: int, terrain_type: String) ->
 	var shape = RectangleShape2D.new()
 	shape.size = Vector2(segment_width, ground_height)
 	collision.shape = shape
-	# Position collision shape so the top surface is at piece_height
-	# The collision shape extends downward from piece_height by ground_height
-	collision.position = Vector2(0, piece_height - ground_height/2)
+	# Position collision shape to match the visual positioning exactly
+	# Visual is at (-segment_width/2, height - ground_height), so collision should be at (0, height - ground_height)
+	collision.position = Vector2(0, piece_height - ground_height)
 	ground_piece.add_child(collision)
 	
 	# Create visual representation

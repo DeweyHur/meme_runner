@@ -9,6 +9,7 @@ extends Node2D
 @export var terrain_complexity = 0.7  # How complex the terrain should be
 @export var max_walkable_slope = 25.0  # Maximum slope angle in degrees that player can walk up
 @export var slope_segment_length = 6  # How many segments to use for gradual slopes
+@export var walkable_height_threshold = 30.0  # Height difference threshold for walkable slopes
 
 var player: Node2D
 var last_segment_end = 0.0
@@ -51,11 +52,17 @@ func generate_next_segment():
 	# Generate terrain type first
 	var terrain_type = choose_terrain_type()
 	
+	# Generate height change
+	var height_change = calculate_height_change(terrain_type)
+	
+	# Convert small height changes to walkable slopes
+	var adjusted_terrain_type = convert_to_walkable_slope(height_change)
+	if adjusted_terrain_type != "normal":
+		terrain_type = adjusted_terrain_type
+	
 	# Determine segment length based on terrain type
 	var segment_length = get_segment_length_for_terrain(terrain_type)
 	
-	# Generate height change
-	var height_change = calculate_height_change(terrain_type)
 	target_height = float(current_height) + float(height_change)
 	
 	# Clamp height to reasonable bounds
@@ -72,13 +79,13 @@ func generate_next_segment():
 func choose_terrain_type() -> String:
 	var rand_val = randf()
 	
-	if rand_val < 0.3:
+	if rand_val < 0.4:
 		return "normal"
-	elif rand_val < 0.45:
+	elif rand_val < 0.55:
 		return "uphill"
-	elif rand_val < 0.6:
-		return "downhill"
 	elif rand_val < 0.7:
+		return "downhill"
+	elif rand_val < 0.75:
 		return "hill"
 	elif rand_val < 0.8:
 		return "valley"
@@ -128,6 +135,17 @@ func calculate_height_change(terrain_type: String) -> float:
 			return randf_range(-max_height_variation * 0.6, max_height_variation * 0.6)
 		_:
 			return 0.0
+
+func convert_to_walkable_slope(height_change: float) -> String:
+	# If height difference is small, convert to walkable slope
+	if abs(height_change) < walkable_height_threshold:
+		if height_change > 0:
+			print("Converting small height change (%.1f) to uphill slope" % height_change)
+			return "uphill"
+		else:
+			print("Converting small height change (%.1f) to downhill slope" % height_change)
+			return "downhill"
+	return "normal"
 
 func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	var segment = Node2D.new()

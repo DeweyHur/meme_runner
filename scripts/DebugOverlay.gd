@@ -138,6 +138,14 @@ func update_ground_debug_info():
 	if procedural_ground.segments.size() > 0:
 		var last_segment = procedural_ground.segments[-1]
 		ground_info += "Last Segment Type: %s\n" % last_segment.name
+		
+		# Show height difference info
+		var height_diff = procedural_ground.target_height - procedural_ground.current_height
+		ground_info += "Height Difference: %.1f\n" % height_diff
+		if abs(height_diff) < procedural_ground.walkable_height_threshold:
+			ground_info += "Status: Walkable Slope\n"
+		else:
+			ground_info += "Status: Jump Required\n"
 	
 	# Position ground debug label at bottom of screen
 	var viewport_size = get_viewport().get_visible_rect().size

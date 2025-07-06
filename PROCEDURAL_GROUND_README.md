@@ -34,8 +34,9 @@ The `ProceduralGround.gd` script has several export variables you can adjust:
 - `max_segment_length`: Maximum number of pieces per segment (default: 8)
 - `smoothness`: How smooth transitions are (0-1, default: 0.3)
 - `terrain_complexity`: Overall complexity of terrain (default: 0.7)
-- `max_walkable_slope`: Maximum slope angle in degrees that player can walk up (default: 30.0)
-- `slope_segment_length`: How many segments to use for gradual slopes (default: 4)
+- `max_walkable_slope`: Maximum slope angle in degrees that player can walk up (default: 25.0)
+- `slope_segment_length`: How many segments to use for gradual slopes (default: 6)
+- `walkable_height_threshold`: Height difference threshold for automatic slope conversion (default: 30.0)
 
 ## How It Works
 
@@ -54,6 +55,8 @@ The system now includes **uphill** and **downhill** slopes that players can trav
 - **Gradual Declines**: Smooth downward slopes that don't require jumping
 - **Configurable Angle**: Adjust `max_walkable_slope` to control maximum walkable angle
 - **Smooth Transitions**: Slopes use longer segments for gradual height changes
+- **Automatic Conversion**: Small height differences (< 30 units) are automatically converted to walkable slopes
+- **Smart Terrain**: Reduces jump-required terrain for smoother gameplay
 
 ## Usage
 

@@ -9,6 +9,7 @@ var is_sliding = false
 var is_jumping = false
 var can_jump = true
 var can_slide = true
+var debug_info = {}  # Store debug information
 
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var collision_shape = $CollisionShape2D
@@ -31,19 +32,30 @@ func handle_slope_movement():
 		# Get the floor normal to determine slope direction
 		var floor_normal = get_floor_normal()
 		
+		# Store debug info
+		debug_info["floor_normal"] = floor_normal
+		debug_info["slope_angle"] = 0.0
+		debug_info["slope_type"] = "Flat"
+		
 		# If we're on a slope (not flat ground)
 		if floor_normal.y < 0.9:  # Less than 0.9 means we're on a slope
 			# Calculate slope angle
 			var slope_angle = acos(floor_normal.y)
+			debug_info["slope_angle"] = slope_angle
 			
 			# If slope is walkable (less than 45 degrees)
 			if slope_angle < 0.785398:  # 45 degrees in radians (PI/4)
 				# Adjust velocity to move along the slope
 				var slope_velocity = velocity.x / cos(slope_angle)
 				velocity.y = -slope_velocity * sin(slope_angle)
+				debug_info["slope_type"] = "Walkable"
+				debug_info["slope_velocity"] = slope_velocity
 			else:
 				# Too steep, slide down
 				velocity.y += gravity * 0.5
+				debug_info["slope_type"] = "Steep"
+		else:
+			debug_info["slope_type"] = "Flat"
 
 func _physics_process(delta):
 	# Add gravity

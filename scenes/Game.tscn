@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bqxvhqxqxqxqx"]
+[gd_scene load_steps=5 format=3 uid="uid://bqxvhqxqxqxqx"]
 
 [ext_resource type="PackedScene" uid="uid://bqxvhqxqxqxqx" path="res://scenes/Player.tscn" id="1_0x0x0"]
 [ext_resource type="Script" uid="uid://dg5avii0ujofr" path="res://scripts/Game.gd" id="2_0x0x0"]
 [ext_resource type="Script" path="res://scripts/ProceduralGround.gd" id="3_0x0x0"]
+[ext_resource type="Script" path="res://scripts/DebugOverlay.gd" id="4_0x0x0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(2000, 50)
@@ -51,3 +52,6 @@ Press DOWN ARROW to slide
 Avoid obstacles!"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("4_0x0x0")

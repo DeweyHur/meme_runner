@@ -68,8 +68,26 @@ func generate_next_segment():
 	# Clamp height to reasonable bounds
 	target_height = clamp(target_height, 400.0, 600.0)
 	
+	# Final validation: if height difference is small, force walkable slope
+	var final_height_diff = abs(target_height - current_height)
+	if final_height_diff < walkable_height_threshold:
+		# Recalculate terrain type based on final height difference
+		if target_height > current_height:
+			terrain_type = "uphill"
+			print("Final validation: Converting to uphill slope (height diff: %.1f)" % final_height_diff)
+		else:
+			terrain_type = "downhill"
+			print("Final validation: Converting to downhill slope (height diff: %.1f)" % final_height_diff)
+		
+		# Adjust segment length for slopes
+		segment_length = slope_segment_length
+	
 	# Create the segment
 	var segment = create_ground_segment(segment_length, terrain_type)
+	
+	# Validate the segment
+	validate_ground_segment(segment, terrain_type)
+	
 	segments.append(segment)
 	
 	# Update positions
@@ -146,6 +164,23 @@ func convert_to_walkable_slope(height_change: float) -> String:
 			print("Converting small height change (%.1f) to downhill slope" % height_change)
 			return "downhill"
 	return "normal"
+
+func validate_ground_segment(segment: Node2D, terrain_type: String):
+	# Validate that the segment has proper collision setup
+	for i in range(segment.get_child_count()):
+		var piece = segment.get_child(i)
+		if piece is StaticBody2D:
+			# Ensure collision layer is set correctly
+			piece.collision_layer = 1
+			piece.collision_mask = 0
+			
+			# Check collision shape
+			for j in range(piece.get_child_count()):
+				var child = piece.get_child(j)
+				if child is CollisionShape2D:
+					# Ensure collision shape is valid
+					if child.shape:
+						print("Validated ground piece %d in segment %s" % [i, segment.name])
 
 func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	var segment = Node2D.new()

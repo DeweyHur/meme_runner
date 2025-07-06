@@ -44,6 +44,14 @@ func handle_slope_movement():
 			debug_info["slope_type"] = "Invalid"
 			return
 		
+		# Additional validation for extreme angles (like 180 degrees)
+		if floor_normal.y < 0.0:  # Negative Y means upside down or invalid
+			# Force player to fall and reset position
+			velocity.y += gravity * 3.0
+			debug_info["slope_type"] = "Extreme Angle"
+			print("Extreme slope angle detected! Forcing fall...")
+			return
+		
 		# If we're on a slope (not flat ground)
 		if floor_normal.y < 0.9:  # Less than 0.9 means we're on a slope
 			# Calculate slope angle

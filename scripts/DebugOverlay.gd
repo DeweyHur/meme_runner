@@ -144,11 +144,14 @@ func update_ground_debug_info():
 		ground_info += "Height Difference: %.1f\n" % height_diff
 		if abs(height_diff) < procedural_ground.walkable_height_threshold:
 			ground_info += "Status: Walkable Slope\n"
+			ground_info += "Validation: Should be walkable\n"
 		else:
 			ground_info += "Status: Jump Required\n"
+			ground_info += "Validation: Height exceeds threshold\n"
 	
 	# Position ground debug label at fixed position (middle-left of screen)
-	ground_debug_label.position = Vector2(10, 200)
+	var viewport_size = get_viewport().get_visible_rect().size
+	ground_debug_label.position = Vector2(viewport_size.x - 300, 10)
 	
 	# Update label text
 	ground_debug_label.text = ground_info 

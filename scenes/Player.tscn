@@ -47,9 +47,6 @@ animations = [{
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_0x0x0")
-run_speed = null
-jump_velocity = null
-slide_speed = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -36)
@@ -62,7 +59,7 @@ scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_jfpux")
 animation = &"run"
 autoplay = "run"
-frame_progress = 0.862861
+frame_progress = 0.421498
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true

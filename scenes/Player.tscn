@@ -1,0 +1,63 @@
+[gd_scene load_steps=12 format=3 uid="uid://bqxvhqxqxqxqx"]
+
+[ext_resource type="Script" uid="uid://jc227hmcioi5" path="res://scripts/Player.gd" id="1_0x0x0"]
+[ext_resource type="Texture2D" uid="uid://cy303nq54hhn4" path="res://run_animation/run-1.png" id="2_bruh7"]
+[ext_resource type="Texture2D" uid="uid://dugt7wn8pm0kg" path="res://run_animation/run-2.png" id="3_6eyey"]
+[ext_resource type="Texture2D" uid="uid://jlkvlc7vsv5a" path="res://run_animation/run-3.png" id="4_d3wef"]
+[ext_resource type="Texture2D" uid="uid://4m05jce6n6n2" path="res://run_animation/run-4.png" id="5_o4126"]
+[ext_resource type="Texture2D" uid="uid://cgtgist2u61gf" path="res://run_animation/run-5.png" id="6_lkdrv"]
+[ext_resource type="Texture2D" uid="uid://cd34ghic4xuns" path="res://run_animation/run-6.png" id="7_p7iby"]
+[ext_resource type="Texture2D" uid="uid://bu3uhgk5act5v" path="res://run_animation/run-7.png" id="8_0rnld"]
+[ext_resource type="Texture2D" uid="uid://b73uob5c0wepx" path="res://run_animation/run-8.png" id="9_srp4u"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(32, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jfpux"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_6eyey")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_d3wef")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_o4126")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_lkdrv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_p7iby")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_0rnld")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_srp4u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_bruh7")
+}],
+"loop": true,
+"name": &"run",
+"speed": 15.0
+}]
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_0x0x0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(0.2, 0.6, 1, 1)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_jfpux")
+animation = &"run"
+autoplay = "run"
+frame_progress = 0.977575
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true

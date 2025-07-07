@@ -118,7 +118,7 @@ func shoot():
 		bullet.global_position = global_position + Vector2(50, -20)  # Spawn in front of player
 		
 		# Set bullet speed relative to player run speed
-		bullet.speed = run_speed
+		bullet.speed = run_speed + 500
 		
 		# Reset shooting state after animation
 		var timer = Timer.new()

@@ -9,6 +9,12 @@ var score = 0
 var game_speed = 1.0
 var player_position = 0.0
 
+# Turret spawning variables
+var turret_scene = preload("res://Enemies/Turret/turret.tscn")
+var turret_spawn_timer = 0.0
+var turret_spawn_interval = 5.0  # Spawn turret every 5 seconds
+var turret_spawn_distance = 600.0  # Distance ahead of player to spawn turrets
+
 @onready var player = $Player
 @onready var obstacle_spawner = $ObstacleSpawner
 @onready var obstacle_timer = $ObstacleSpawner/ObstacleTimer
@@ -42,6 +48,12 @@ func _process(delta):
 		# Update camera to follow player
 		if camera:
 			camera.position.x = player.position.x
+	
+	# Handle turret spawning
+	turret_spawn_timer += delta
+	if turret_spawn_timer >= turret_spawn_interval:
+		spawn_turret()
+		turret_spawn_timer = 0.0
 
 func _on_obstacle_timer_timeout():
 	# spawn_obstacle()
@@ -157,4 +169,65 @@ func _input(event):
 
 func restart_game():
 	get_tree().paused = false
-	get_tree().reload_current_scene() 
+	get_tree().reload_current_scene()
+
+func spawn_turret():
+	if not turret_scene or not player:
+		return
+	
+	# Calculate spawn position ahead of player
+	var spawn_x = player.position.x + turret_spawn_distance
+	
+	# Get ground height and normal at spawn position
+	var ground_info = get_ground_info_at_position(spawn_x)
+	if ground_info.height == -1:
+		return  # Couldn't find ground height
+	
+	# Spawn turret
+	var turret = turret_scene.instantiate()
+	add_child(turret)
+	turret.global_position = Vector2(spawn_x, ground_info.height - 25)  # Position on ground
+	
+	# Orient turret orthogonal to ground normal
+	if ground_info.normal != Vector2.ZERO:
+		var ground_angle = ground_info.normal.angle()
+		var turret_rotation = ground_angle + PI/2  # Add 90 degrees to be orthogonal
+		turret.rotation = turret_rotation
+		print("Spawned turret at position: %s with rotation: %.2f° (ground normal: %s)" % [
+			turret.global_position, rad_to_deg(turret_rotation), ground_info.normal
+		])
+	else:
+		print("Spawned turret at position: ", turret.global_position)
+	
+	# Add cleanup timer for turrets
+	var cleanup_timer = Timer.new()
+	turret.add_child(cleanup_timer)
+	cleanup_timer.wait_time = 15.0  # Remove turrets after 15 seconds
+	cleanup_timer.one_shot = true
+	cleanup_timer.timeout.connect(func(): turret.queue_free())
+	cleanup_timer.start()
+
+func get_ground_height_at_position(x_position: float) -> float:
+	# Try to find ground height by raycasting or checking procedural ground
+	if procedural_ground:
+		# Get the ground height from procedural ground
+		return get_ground_height_from_procedural_ground(x_position)
+	
+	# Fallback: use a default height
+	return 500.0
+
+func get_ground_info_at_position(x_position: float) -> Dictionary:
+	# Get ground height and normal from procedural ground
+	if procedural_ground and procedural_ground.has_method("get_ground_info_at"):
+		return procedural_ground.get_ground_info_at(x_position)
+	
+	# Fallback: use default values
+	return {"height": 500.0, "normal": Vector2.UP}
+
+func get_ground_height_from_procedural_ground(x_position: float) -> float:
+	# Use the procedural ground's get_ground_height_at method
+	if procedural_ground and procedural_ground.has_method("get_ground_height_at"):
+		return procedural_ground.get_ground_height_at(x_position)
+	
+	# Fallback: use a default height
+	return 500.0 

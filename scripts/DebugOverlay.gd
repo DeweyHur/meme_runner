@@ -5,7 +5,8 @@ extends CanvasLayer
 
 var player_debug_label: Label
 var ground_debug_label: Label
-var debug_visible = true
+var bullet_debug_label: Label
+var debug_visible = false
 
 func _ready():
 	# Create player debug label
@@ -28,6 +29,16 @@ func _ready():
 	ground_debug_label.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(ground_debug_label)
 	
+	# Create bullet debug label
+	bullet_debug_label = Label.new()
+	bullet_debug_label.name = "BulletDebugLabel"
+	bullet_debug_label.add_theme_font_size_override("font_size", 12)
+	bullet_debug_label.add_theme_color_override("font_color", Color.ORANGE)
+	bullet_debug_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	bullet_debug_label.add_theme_constant_override("shadow_offset_x", 1)
+	bullet_debug_label.add_theme_constant_override("shadow_offset_y", 1)
+	add_child(bullet_debug_label)
+	
 	# Create toggle instruction label
 	var toggle_label = Label.new()
 	toggle_label.name = "ToggleLabel"
@@ -39,6 +50,11 @@ func _ready():
 	toggle_label.add_theme_constant_override("shadow_offset_y", 1)
 	toggle_label.position = Vector2(10, 10)
 	add_child(toggle_label)
+	
+	# Set initial visibility
+	player_debug_label.visible = debug_visible
+	ground_debug_label.visible = debug_visible
+	bullet_debug_label.visible = debug_visible
 
 func _process(delta):
 	if not player:
@@ -53,6 +69,7 @@ func _process(delta):
 	if debug_visible:
 		update_player_debug_info()
 		update_ground_debug_info()
+		update_bullet_debug_info()
 
 func update_player_debug_info():
 	if not player:
@@ -220,4 +237,57 @@ func update_ground_debug_info():
 	ground_debug_label.position = Vector2(viewport_size.x - 400, 10)
 	
 	# Update label text
-	ground_debug_label.text = ground_info 
+	ground_debug_label.text = ground_info
+
+func update_bullet_debug_info():
+	# Get bullet information
+	var bullet_info = ""
+	bullet_info += "Bullet Collision Debug:\n"
+	
+	# Count active bullets
+	var active_bullets = 0
+	var player_bullets = 0
+	var turret_bullets = 0
+	
+	# Find all bullets in the scene
+	var bullets = get_tree().get_nodes_in_group("bullets")
+	if bullets.size() == 0:
+		# Try to find bullets by checking all Area2D nodes
+		for node in get_tree().get_nodes_in_group(""):
+			if node is Area2D and node.has_method("get_debug_info"):
+				bullets.append(node)
+	
+	for bullet in bullets:
+		if bullet.has_method("get_debug_info"):
+			active_bullets += 1
+			if bullet.bullet_type == "player":
+				player_bullets += 1
+			elif bullet.bullet_type == "turret":
+				turret_bullets += 1
+	
+	bullet_info += "Active Bullets: %d\n" % active_bullets
+	bullet_info += "Player Bullets: %d\n" % player_bullets
+	bullet_info += "Turret Bullets: %d\n" % turret_bullets
+	
+	# Count and show turret information
+	var turrets = get_tree().get_nodes_in_group("enemies")
+	var turret_count = 0
+	for turret in turrets:
+		if turret.name.contains("Turret"):
+			turret_count += 1
+	
+	bullet_info += "Active Turrets: %d\n" % turret_count
+	
+	# Show recent collision events (this would need to be tracked)
+	bullet_info += "\nCollision Rules:\n"
+	bullet_info += "✅ Player bullets → Enemies\n"
+	bullet_info += "✅ Turret bullets → Player\n"
+	bullet_info += "❌ Player bullets → Player\n"
+	bullet_info += "❌ Turret bullets → Enemies\n"
+	
+	# Position bullet debug label at bottom-left
+	var viewport_size = get_viewport().get_visible_rect().size
+	bullet_debug_label.position = Vector2(10, viewport_size.y - 200)
+	
+	# Update label text
+	bullet_debug_label.text = bullet_info 

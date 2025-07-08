@@ -261,6 +261,12 @@ func create_ground_piece_with_edges(index: int, total_length: int, terrain_type:
 
 	ground_piece.position = Vector2(index * segment_width, 0)
 	print("Created ground piece %d, left: %.2f, right: %.2f" % [index, left_height, right_height])
+	
+	# Add method to get ground height
+	ground_piece.set_script(load("res://scripts/GroundPiece.gd"))
+	ground_piece.left_height = left_height
+	ground_piece.right_height = right_height
+	
 	return ground_piece
 
 func create_sloped_collision_shape(left_height: float, right_height: float, index: int, total_length: int) -> Shape2D:
@@ -549,8 +555,40 @@ func get_ground_height_at(x: float) -> float:
 			
 			if piece_index < segment.get_child_count():
 				var piece = segment.get_child(piece_index)
-				if piece.has_method("get_ground_height"):
+				if piece.has_method("get_ground_height_at_x"):
+					# Calculate x offset within the piece
+					var piece_x_offset = relative_x - (piece_index * segment_width)
+					return piece.get_ground_height_at_x(piece_x_offset)
+				elif piece.has_method("get_ground_height"):
 					return piece.get_ground_height()
 	
 	# Default height if no segment found
-	return 500.0 
+	return 500.0
+
+# Function to get ground height and normal at a specific x position
+func get_ground_info_at(x: float) -> Dictionary:
+	# Find the segment that contains this x position
+	for segment in segments:
+		var segment_start = segment.position.x
+		var segment_end = segment_start + segment_width * max_segment_length
+		
+		if x >= segment_start and x < segment_end:
+			# Calculate relative position within segment
+			var relative_x = x - segment_start
+			var piece_index = int(relative_x / segment_width)
+			
+			if piece_index < segment.get_child_count():
+				var piece = segment.get_child(piece_index)
+				if piece.has_method("get_ground_info_at_x"):
+					# Calculate x offset within the piece
+					var piece_x_offset = relative_x - (piece_index * segment_width)
+					return piece.get_ground_info_at_x(piece_x_offset)
+				elif piece.has_method("get_ground_height"):
+					# Fallback to just height with default normal
+					return {
+						"height": piece.get_ground_height(),
+						"normal": Vector2.UP
+					}
+	
+	# Default values if no segment found
+	return {"height": 500.0, "normal": Vector2.UP} 

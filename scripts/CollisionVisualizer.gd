@@ -7,7 +7,7 @@ var collision_lines: Array[Line2D] = []
 var normal_lines: Array[Line2D] = []
 var player_collision_line: Line2D
 var player_normal_line: Line2D
-var debug_visible = true
+var debug_visible = false
 
 func _ready():
 	# Create player collision visualization
@@ -35,6 +35,10 @@ func _ready():
 	toggle_label.add_theme_constant_override("shadow_offset_y", 1)
 	toggle_label.position = Vector2(10, 30)
 	add_child(toggle_label)
+	
+	# Set initial visibility
+	player_collision_line.visible = debug_visible
+	player_normal_line.visible = debug_visible
 
 func _process(delta):
 	if not player:

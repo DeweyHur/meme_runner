@@ -14,6 +14,9 @@ var is_jumping = false
 var is_sliding = false
 var is_crouching = false
 var is_shooting = false
+var is_hurt = false
+var hurt_velocity = Vector2.ZERO
+var hurt_timer = 0.0
 var debug_info = {}  # Store debug information
 
 # Shooting variables
@@ -21,8 +24,31 @@ var shoot_timer = 0.0
 var shoot_interval = 1.0  # Configurable shooting interval in seconds
 var bullet_scene = preload("res://VFX/shot.tscn")
 
+func _ready():
+	# Add player to group so turrets can find it
+	add_to_group("player")
+	
+	# Connect area collision signals
+	var area2d = $Area2D
+	if area2d:
+		area2d.body_entered.connect(_on_area_body_entered)
+		area2d.area_entered.connect(_on_area_area_entered)
 
 func _physics_process(delta):
+	# Handle hurt movement
+	if is_hurt:
+		hurt_timer += delta
+		
+		# Gradually slow down the hurt velocity
+		var deceleration = 400.0  # pixels per second squared
+		hurt_velocity.x = move_toward(hurt_velocity.x, 0, deceleration * delta)
+		
+		# Apply hurt velocity (backward movement)
+		velocity = hurt_velocity
+		move_and_slide()
+		update_animations(0)  # No input during hurt
+		return
+	
 	# Add the gravity.
 	if not is_on_floor():
 		velocity.y += gravity * delta
@@ -73,7 +99,9 @@ func update_animations(input_axis):
 	elif input_axis < 0:
 		animated_sprite_2d.flip_h = true
 		
-	if is_on_floor():
+	if is_hurt:
+		animated_sprite_2d.play("hurt")
+	elif is_on_floor():
 		if is_crouching:
 			animated_sprite_2d.play("crouch")
 		elif is_shooting:
@@ -117,8 +145,11 @@ func shoot():
 		get_parent().add_child(bullet)
 		bullet.global_position = global_position + Vector2(50, -20)  # Spawn in front of player
 		
-		# Set bullet speed relative to player run speed
+		# Set bullet speed and direction for player shots
 		bullet.speed = run_speed + 500
+		bullet.direction = Vector2.RIGHT  # Player always shoots forward
+		bullet.bullet_type = "player"  # Mark as player bullet
+		print("🎯 Player spawned bullet - Type: %s, Speed: %.1f" % [bullet.bullet_type, bullet.speed])
 		
 		# Reset shooting state after animation
 		var timer = Timer.new()
@@ -127,5 +158,46 @@ func shoot():
 		timer.one_shot = true
 		timer.timeout.connect(func(): is_shooting = false)
 		timer.start()
+
+func take_damage():
+	print("Player took damage!")
+	is_hurt = true
+	hurt_timer = 0.0
+	
+	# Set hurt velocity for smooth backward movement
+	hurt_velocity = Vector2(-300, 0)  # Move backward at 300 pixels per second
+	
+	# Play hurt animation and wait
+	var timer = Timer.new()
+	add_child(timer)
+	timer.wait_time = 1.0  # Hurt duration
+	timer.one_shot = true
+	timer.timeout.connect(func(): 
+		is_hurt = false
+		hurt_velocity = Vector2.ZERO
+		hurt_timer = 0.0
+		print("Player recovered from damage!")
+	)
+	timer.start()
+
+func _on_area_body_entered(body):
+	# Handle collision with turrets
+	print("Player area body collision - Target: %s, Groups: %s" % [body.name, str(body.get_groups())])
+	if body.is_in_group("enemies") and body.has_method("take_damage"):
+		print("✅ VALID: Player hit by turret!")
+		take_damage()
+		body.take_damage()  # Destroy the turret
+	else:
+		print("ℹ️  Player hit by non-enemy body: %s" % body.name)
+
+func _on_area_area_entered(area):
+	# Handle collision with bullets
+	print("Player area collision - Target: %s, Groups: %s" % [area.name, str(area.get_groups())])
+	if area.has_method("_on_body_entered"):  # This is a bullet
+		print("ℹ️  Player area collision with bullet-like object: %s" % area.name)
+		# Note: Actual bullet damage is handled in the bullet's _on_body_entered method
+		# This is just for tracking collision events
+	else:
+		print("ℹ️  Player area collision with non-bullet area: %s" % area.name)
 
 	

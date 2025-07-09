@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bqxvhqxqxqxqx"]
+[gd_scene load_steps=8 format=3 uid="uid://bqxvhqxqxqxqx"]
 
 [ext_resource type="PackedScene" uid="uid://hqfnafaag1yy" path="res://Player/player.tscn" id="1_0x0x0"]
 [ext_resource type="Script" uid="uid://dg5avii0ujofr" path="res://scripts/Game.gd" id="2_0x0x0"]
@@ -6,9 +6,14 @@
 [ext_resource type="Script" uid="uid://bnwdi5skpif7x" path="res://scripts/DebugOverlay.gd" id="4_0x0x0"]
 [ext_resource type="Script" uid="uid://vu2rh3mbcquj" path="res://scripts/CollisionVisualizer.gd" id="5_0x0x0"]
 [ext_resource type="AudioStream" uid="uid://d2qgefq70aowe" path="res://Music/cyber_runner.ogg" id="6_0x0x0"]
+[ext_resource type="PackedScene" uid="uid://3sksd0fw621u" path="res://World/parallax_background.tscn" id="7_0x0x0"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("2_0x0x0")
+
+[node name="ParallaxBackground" parent="." instance=ExtResource("7_0x0x0")]
+scale = Vector2(2, 2)
+transform = Transform2D(2, 0, 0, 2, 0, 0)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(100, 300)

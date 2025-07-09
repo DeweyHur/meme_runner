@@ -20,6 +20,9 @@ func _ready():
 	if not player:
 		# Try to find player by name
 		player = get_tree().get_first_node_in_group("Player")
+	
+	# Debug collision setup
+	print("🏗️  Turret created - Layer: 2, Mask: 1, Group: enemies")
 
 func _physics_process(delta):
 	if player:

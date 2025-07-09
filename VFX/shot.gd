@@ -22,6 +22,9 @@ func _ready():
 		print("⚠️  WARNING: Invalid bullet type: %s" % bullet_type)
 		bullet_type = "player"  # Default to player bullet
 		print("   Set to default type: %s" % bullet_type)
+	
+	# Debug collision setup
+	print("🔫 Bullet created - Type: %s, Layer: 2, Mask: 3" % bullet_type)
 
 func _physics_process(delta):
 	if not has_hit:

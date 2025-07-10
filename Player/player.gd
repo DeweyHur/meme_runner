@@ -21,7 +21,7 @@ var debug_info = {}  # Store debug information
 
 # Shooting variables
 var shoot_timer = 0.0
-var shoot_interval = 1.0  # Configurable shooting interval in seconds
+var shoot_interval = 4.0  # Configurable shooting interval in seconds
 var bullet_scene = preload("res://VFX/shot.tscn")
 
 func _ready():

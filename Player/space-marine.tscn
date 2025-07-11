@@ -119,7 +119,7 @@ animations = [{
 "texture": ExtResource("13_crawl6")
 }],
 "loop": true,
-"name": &"crawl",
+"name": &"crouch",
 "speed": 8.0
 }, {
 "frames": [{
@@ -133,7 +133,7 @@ animations = [{
 "texture": ExtResource("4_crouch3")
 }],
 "loop": true,
-"name": &"crouch",
+"name": &"crouch_1",
 "speed": 5.0
 }, {
 "frames": [{
@@ -172,7 +172,7 @@ animations = [{
 "texture": ExtResource("7_die3")
 }],
 "loop": false,
-"name": &"die",
+"name": &"fall",
 "speed": 5.0
 }, {
 "frames": [{
@@ -372,7 +372,7 @@ script = ExtResource("1_23j4b")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -34)
 sprite_frames = SubResource("SpriteFrames_space_marine")
-animation = &"climb"
+animation = &"fall"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

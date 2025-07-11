@@ -1,0 +1,387 @@
+[gd_scene load_steps=76 format=3 uid="uid://fs80hbi8xrpb"]
+
+[ext_resource type="Script" uid="uid://cs074l22h6bmu" path="res://Player/player.gd" id="1_23j4b"]
+[ext_resource type="Texture2D" uid="uid://cswsic4vc75cr" path="res://Player/space-marine/Sprites/Idle/sprites/idle1.png" id="1_idle1"]
+[ext_resource type="Texture2D" uid="uid://bpd0xgenuxj73" path="res://Player/space-marine/Sprites/Idle/sprites/idle2.png" id="1_idle2"]
+[ext_resource type="Texture2D" uid="uid://bnf3cbuwy50f3" path="res://Player/space-marine/Sprites/Idle/sprites/idle3.png" id="1_idle3"]
+[ext_resource type="Texture2D" uid="uid://cfx48ximqqcv1" path="res://Player/space-marine/Sprites/Idle/sprites/idle4.png" id="1_idle4"]
+[ext_resource type="Texture2D" uid="uid://u87wxcbqdcwq" path="res://Player/space-marine/Sprites/Run/sprites/run1.png" id="2_run1"]
+[ext_resource type="Texture2D" uid="uid://beilo77ap068j" path="res://Player/space-marine/Sprites/Run/sprites/run2.png" id="2_run2"]
+[ext_resource type="Texture2D" uid="uid://cp04qtfsqdut1" path="res://Player/space-marine/Sprites/Run/sprites/run3.png" id="2_run3"]
+[ext_resource type="Texture2D" uid="uid://cji81kjjtqh3l" path="res://Player/space-marine/Sprites/Run/sprites/run4.png" id="2_run4"]
+[ext_resource type="Texture2D" uid="uid://pkm70wlxyi2j" path="res://Player/space-marine/Sprites/Run/sprites/run5.png" id="2_run5"]
+[ext_resource type="Texture2D" uid="uid://g2j2g2fi77kv" path="res://Player/space-marine/Sprites/Run/sprites/run6.png" id="2_run6"]
+[ext_resource type="Texture2D" uid="uid://dp4sj6ruxb6pa" path="res://Player/space-marine/Sprites/Run/sprites/run7.png" id="2_run7"]
+[ext_resource type="Texture2D" uid="uid://deq20fhymfp3q" path="res://Player/space-marine/Sprites/Run/sprites/run8.png" id="2_run8"]
+[ext_resource type="Texture2D" uid="uid://bvuyi5fo7yyib" path="res://Player/space-marine/Sprites/Run/sprites/run9.png" id="2_run9"]
+[ext_resource type="Texture2D" uid="uid://ceid7sfjtniec" path="res://Player/space-marine/Sprites/Run/sprites/run10.png" id="2_run10"]
+[ext_resource type="Texture2D" uid="uid://c74plbblfjrag" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun1.png" id="3_jump1"]
+[ext_resource type="Texture2D" uid="uid://cst4r1niaup78" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun2.png" id="3_jump2"]
+[ext_resource type="Texture2D" uid="uid://cwr8h5275fbng" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun3.png" id="3_jump3"]
+[ext_resource type="Texture2D" uid="uid://o33lqvfy4ysw" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun4.png" id="3_jump4"]
+[ext_resource type="Texture2D" uid="uid://bluj2tippnjcp" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun5.png" id="3_jump5"]
+[ext_resource type="Texture2D" uid="uid://3givgapqfgxj" path="res://Player/space-marine/Sprites/Jump no Gun/sprites/jump-no-gun6.png" id="3_jump6"]
+[ext_resource type="Texture2D" uid="uid://bdvf8esw71o44" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch1.png" id="4_crouch1"]
+[ext_resource type="Texture2D" uid="uid://sgickaq31eoy" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch2.png" id="4_crouch2"]
+[ext_resource type="Texture2D" uid="uid://dpebaiebshtvx" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch3.png" id="4_crouch3"]
+[ext_resource type="Texture2D" uid="uid://dat3e2pcqmmnb" path="res://Player/space-marine/Sprites/Shoot/sprites/shoot1.png" id="5_shoot1"]
+[ext_resource type="Texture2D" uid="uid://80hbyslc5na4" path="res://Player/space-marine/Sprites/Shoot/sprites/shoot2.png" id="5_shoot2"]
+[ext_resource type="Texture2D" uid="uid://cnvdouth4sic1" path="res://Player/space-marine/Sprites/Climb/sprites/climb1.png" id="6_climb1"]
+[ext_resource type="Texture2D" uid="uid://di4pjekptsan7" path="res://Player/space-marine/Sprites/Climb/sprites/climb2.png" id="6_climb2"]
+[ext_resource type="Texture2D" uid="uid://bsfag3liqbdgf" path="res://Player/space-marine/Sprites/Climb/sprites/climb3.png" id="6_climb3"]
+[ext_resource type="Texture2D" uid="uid://c6e214ixus8op" path="res://Player/space-marine/Sprites/Climb/sprites/climb4.png" id="6_climb4"]
+[ext_resource type="Texture2D" uid="uid://clvjyh3m4afmp" path="res://Player/space-marine/Sprites/Climb/sprites/climb5.png" id="6_climb5"]
+[ext_resource type="Texture2D" uid="uid://c2dkcqtxmkx1c" path="res://Player/space-marine/Sprites/Climb/sprites/climb6.png" id="6_climb6"]
+[ext_resource type="Texture2D" uid="uid://b4sl2bp4yitqy" path="res://Player/space-marine/Sprites/Die/sprites/die1.png" id="7_die1"]
+[ext_resource type="Texture2D" uid="uid://cjfspc1le17mv" path="res://Player/space-marine/Sprites/Die/sprites/die2.png" id="7_die2"]
+[ext_resource type="Texture2D" uid="uid://cunqoyvuakg2j" path="res://Player/space-marine/Sprites/Die/sprites/die3.png" id="7_die3"]
+[ext_resource type="Texture2D" uid="uid://cp2pn1ec27eia" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun1.png" id="8_run_gun1"]
+[ext_resource type="Texture2D" uid="uid://7ih52y27qigx" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun2.png" id="8_run_gun2"]
+[ext_resource type="Texture2D" uid="uid://cjyvawj6bsghm" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun3.png" id="8_run_gun3"]
+[ext_resource type="Texture2D" uid="uid://bp6rr7jh7kj1u" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun4.png" id="8_run_gun4"]
+[ext_resource type="Texture2D" uid="uid://cq0ur6meda30h" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun5.png" id="8_run_gun5"]
+[ext_resource type="Texture2D" uid="uid://dp56eh1yjnxct" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun6.png" id="8_run_gun6"]
+[ext_resource type="Texture2D" uid="uid://beiva2i4odbyw" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun7.png" id="8_run_gun7"]
+[ext_resource type="Texture2D" uid="uid://dk4ph7ipq6xik" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun8.png" id="8_run_gun8"]
+[ext_resource type="Texture2D" uid="uid://c6pufr6ermmtj" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun9.png" id="8_run_gun9"]
+[ext_resource type="Texture2D" uid="uid://biupq6texme8r" path="res://Player/space-marine/Sprites/Run with Gun/sprites/run-with-gun10.png" id="8_run_gun10"]
+[ext_resource type="Texture2D" uid="uid://crro3hft7rqij" path="res://Player/space-marine/Sprites/Idle Gun/sprites/idle-gun1.png" id="9_idle_gun1"]
+[ext_resource type="Texture2D" uid="uid://6imphngmimo0" path="res://Player/space-marine/Sprites/Idle Gun/sprites/idle-gun2.png" id="9_idle_gun2"]
+[ext_resource type="Texture2D" uid="uid://da71vp0rml1x4" path="res://Player/space-marine/Sprites/Idle Gun/sprites/idle-gun3.png" id="9_idle_gun3"]
+[ext_resource type="Texture2D" uid="uid://bdprww3lu75sa" path="res://Player/space-marine/Sprites/Idle Gun/sprites/idle-gun4.png" id="9_idle_gun4"]
+[ext_resource type="Texture2D" uid="uid://cn15qkgpjyb73" path="res://Player/space-marine/Sprites/Jump with Gun/sprites/jump-with-gun1.png" id="10_jump_gun1"]
+[ext_resource type="Texture2D" uid="uid://caxug6rijsh6u" path="res://Player/space-marine/Sprites/Jump with Gun/sprites/jump-with-gun2.png" id="10_jump_gun2"]
+[ext_resource type="Texture2D" uid="uid://tklfw2w6r7g" path="res://Player/space-marine/Sprites/Jump with Gun/sprites/jump-with-gun3.png" id="10_jump_gun3"]
+[ext_resource type="Texture2D" uid="uid://det3vknhl7jc8" path="res://Player/space-marine/Sprites/Jump with Gun/sprites/jump-with-gun4.png" id="10_jump_gun4"]
+[ext_resource type="Texture2D" uid="uid://ccp21rhenn0ti" path="res://Player/space-marine/Sprites/Jump with Gun/sprites/jump-with-gun5.png" id="10_jump_gun5"]
+[ext_resource type="Texture2D" uid="uid://djn5age7qbcw8" path="res://Player/space-marine/Sprites/Crouch Gun/sprites/crouch-gun1.png" id="11_crouch_gun1"]
+[ext_resource type="Texture2D" uid="uid://bhbs0308nsk4k" path="res://Player/space-marine/Sprites/Crouch Gun/sprites/crouch-gun2.png" id="11_crouch_gun2"]
+[ext_resource type="Texture2D" uid="uid://bnpvsiuu3pxpp" path="res://Player/space-marine/Sprites/Crouch Gun/sprites/crouch-gun3.png" id="11_crouch_gun3"]
+[ext_resource type="Texture2D" uid="uid://dofi0bhpicvb0" path="res://Player/space-marine/Sprites/Crouch Shoot/sprites/crouch-shoot1.png" id="12_crouch_shoot1"]
+[ext_resource type="Texture2D" uid="uid://c8lvclw0d0irk" path="res://Player/space-marine/Sprites/Crouch Shoot/sprites/crouch-shoot2.png" id="12_crouch_shoot2"]
+[ext_resource type="Texture2D" uid="uid://chgnqjaoc1akm" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl1.png" id="13_crawl1"]
+[ext_resource type="Texture2D" uid="uid://7qk4p78dpmc5" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl2.png" id="13_crawl2"]
+[ext_resource type="Texture2D" uid="uid://oohm10p6556b" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl3.png" id="13_crawl3"]
+[ext_resource type="Texture2D" uid="uid://eg2wmpy5xf0j" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl4.png" id="13_crawl4"]
+[ext_resource type="Texture2D" uid="uid://b85420s0fy3pj" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl5.png" id="13_crawl5"]
+[ext_resource type="Texture2D" uid="uid://brnbuiuy6ocdk" path="res://Player/space-marine/Sprites/Crawl/sprites/crawl6.png" id="13_crawl6"]
+[ext_resource type="Texture2D" uid="uid://bavqcafwgr1fy" path="res://Player/space-marine/Sprites/Throw/sprites/throw1.png" id="14_throw1"]
+[ext_resource type="Texture2D" uid="uid://1iil8stniko6" path="res://Player/space-marine/Sprites/Throw/sprites/throw2.png" id="14_throw2"]
+[ext_resource type="Texture2D" uid="uid://xbx0nr3mlfmh" path="res://Player/space-marine/Sprites/Throw/sprites/throw3.png" id="14_throw3"]
+[ext_resource type="Texture2D" uid="uid://2q5e853nkavt" path="res://Player/space-marine/Sprites/Throw/sprites/throw4.png" id="14_throw4"]
+[ext_resource type="Texture2D" uid="uid://bpnk8yg3cxukx" path="res://Player/space-marine/Sprites/Throw/sprites/throw5.png" id="14_throw5"]
+[ext_resource type="Texture2D" uid="uid://dgojl5vltirbo" path="res://Player/space-marine/Sprites/Throw/sprites/throw6.png" id="14_throw6"]
+[ext_resource type="Texture2D" uid="uid://cfa8e663qdi7x" path="res://Player/space-marine/Sprites/Throw/sprites/throw7.png" id="14_throw7"]
+[ext_resource type="Texture2D" uid="uid://ddcmomai8ptxk" path="res://Player/space-marine/Sprites/Throw/sprites/throw8.png" id="14_throw8"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_space_marine"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_climb1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_climb2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_climb3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_climb4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_climb5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_climb6")
+}],
+"loop": true,
+"name": &"climb",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_crawl1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_crawl2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_crawl3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_crawl4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_crawl5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_crawl6")
+}],
+"loop": true,
+"name": &"crawl",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_crouch1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_crouch2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_crouch3")
+}],
+"loop": true,
+"name": &"crouch",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_crouch_gun1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_crouch_gun2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_crouch_gun3")
+}],
+"loop": true,
+"name": &"crouch_gun",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_crouch_shoot1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_crouch_shoot2")
+}],
+"loop": true,
+"name": &"crouch_shoot",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_die1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_die2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_die3")
+}],
+"loop": false,
+"name": &"die",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_idle1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_idle2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_idle3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_idle4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_idle_gun1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_idle_gun2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_idle_gun3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_idle_gun4")
+}],
+"loop": true,
+"name": &"idle_gun",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_jump1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_jump2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_jump3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_jump4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_jump5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_jump6")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_jump_gun1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_jump_gun2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_jump_gun3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_jump_gun4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_jump_gun5")
+}],
+"loop": true,
+"name": &"jump_gun",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_run1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_run10")
+}],
+"loop": true,
+"name": &"run",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_run_gun1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_run_gun10")
+}],
+"loop": true,
+"name": &"run_gun",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_shoot1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_shoot2")
+}],
+"loop": true,
+"name": &"shoot",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_throw1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_throw8")
+}],
+"loop": false,
+"name": &"throw",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_space_marine"]
+size = Vector2(12, 43)
+
+[node name="SpaceMarinePlayer" type="CharacterBody2D"]
+script = ExtResource("1_23j4b")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -34)
+sprite_frames = SubResource("SpriteFrames_space_marine")
+animation = &"climb"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -21.5)
+shape = SubResource("RectangleShape2D_space_marine")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -21.5)
+shape = SubResource("RectangleShape2D_space_marine")

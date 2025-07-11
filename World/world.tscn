@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://d2ui8uq6c7eit" path="res://Vehicles/vehicle_police.tscn" id="2_nn4x7"]
 [ext_resource type="TileSet" uid="uid://ct8wxhbuia3m6" path="res://World/world-tileset.tres" id="2_t8hfy"]
 [ext_resource type="PackedScene" uid="uid://cahswqih6nvmv" path="res://Vehicles/vehicle_red.tscn" id="2_tt023"]
-[ext_resource type="PackedScene" uid="uid://hqfnafaag1yy" path="res://Player/player.tscn" id="3_36ie2"]
+[ext_resource type="PackedScene" uid="uid://hqfnafaag1yy" path="res://Player/tung.tscn" id="3_36ie2"]
 [ext_resource type="PackedScene" uid="uid://b6phyavynv3jx" path="res://Vehicles/vehicle_truck.tscn" id="3_62sm5"]
 [ext_resource type="PackedScene" uid="uid://cfmsdomhdb77r" path="res://Vehicles/vehicle_yellow.tscn" id="4_4dfuk"]
 [ext_resource type="Texture2D" uid="uid://brvemtq4uguqi" path="res://World/props/banner-arrow.png" id="7_7d60b"]

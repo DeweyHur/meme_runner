@@ -16,6 +16,7 @@ var turret_spawn_interval = 5.0  # Spawn turret every 5 seconds
 var turret_spawn_distance = 600.0  # Distance ahead of player to spawn turrets
 
 @onready var player = $Player
+var selected_character_path: String = "res://Player/tung.tscn"  # Default character
 @onready var obstacle_spawner = $ObstacleSpawner
 @onready var obstacle_timer = $ObstacleSpawner/ObstacleTimer
 @onready var score_label = $UI/ScoreLabel
@@ -24,6 +25,14 @@ var turret_spawn_distance = 600.0  # Distance ahead of player to spawn turrets
 @onready var camera = $Camera2D
 
 func _ready():
+	# Check if we have a character selection from the previous scene
+	if get_tree().has_meta("selected_character"):
+		selected_character_path = get_tree().get_meta("selected_character")
+		get_tree().set_meta("selected_character", null)  # Clear the meta
+	
+	# Replace the default player with the selected character
+	replace_player_with_selected_character()
+	
 	# Connect timer signal
 	obstacle_timer.timeout.connect(_on_obstacle_timer_timeout)
 	
@@ -230,4 +239,19 @@ func get_ground_height_from_procedural_ground(x_position: float) -> float:
 		return procedural_ground.get_ground_height_at(x_position)
 	
 	# Fallback: use a default height
-	return 500.0 
+	return 500.0
+
+func replace_player_with_selected_character():
+	# Remove the default player
+	if player:
+		var player_position = player.position
+		player.queue_free()
+		
+		# Load and instantiate the selected character
+		var character_scene = load(selected_character_path)
+		if character_scene:
+			player = character_scene.instantiate()
+			player.position = player_position
+			add_child(player)
+		else:
+			print("Failed to load character scene: ", selected_character_path) 

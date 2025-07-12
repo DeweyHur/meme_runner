@@ -50,8 +50,13 @@ func _physics_process(delta):
 		var deceleration = 400.0  # pixels per second squared
 		hurt_velocity.x = move_toward(hurt_velocity.x, 0, deceleration * delta)
 		
-		# Apply hurt velocity (backward movement)
+		# Apply hurt velocity (backward movement) and gravity
 		velocity = hurt_velocity
+		
+		# Apply gravity even when hurt
+		if not is_on_floor():
+			velocity.y += gravity * delta
+		
 		move_and_slide()
 		update_animations(0)  # No input during hurt
 		return

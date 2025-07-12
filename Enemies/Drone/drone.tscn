@@ -1,7 +1,26 @@
-[gd_scene load_steps=6 format=3 uid="uid://dj5bvj5ik8sfy"]
+[gd_scene load_steps=7 format=3 uid="uid://dj5bvj5ik8sfy"]
 
 [ext_resource type="Texture2D" uid="uid://pmofgkdhd6u2" path="res://Enemies/Drone/drone_preview.png" id="1_dfg34"]
-[ext_resource type="Script" path="res://Enemies/Drone/drone.gd" id="1_pxc43"]
+[ext_resource type="Script" uid="uid://pgkhp8nn55dw" path="res://Enemies/Drone/drone.gd" id="1_pxc43"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(32, 32)
+
+[sub_resource type="Animation" id="Animation_rmn1b"]
+length = 0.001
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
 
 [sub_resource type="Animation" id="Animation_l2v0t"]
 resource_name = "drone"
@@ -37,37 +56,25 @@ tracks/1/keys = {
 }]
 }
 
-[sub_resource type="Animation" id="Animation_rmn1b"]
-length = 0.001
-loop_mode = 2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_j4qjh"]
 _data = {
-"RESET": SubResource("Animation_rmn1b"),
-"drone": SubResource("Animation_l2v0t")
+&"RESET": SubResource("Animation_rmn1b"),
+&"drone": SubResource("Animation_l2v0t")
 }
 
 [node name="Drone" type="Area2D"]
+scale = Vector2(4, 4)
 script = ExtResource("1_pxc43")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_dfg34")
 hframes = 5
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-autoplay = "drone"
 libraries = {
-"": SubResource("AnimationLibrary_j4qjh")
+&"": SubResource("AnimationLibrary_j4qjh")
 }
+autoplay = "drone"

@@ -71,11 +71,11 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 
 [node name="Turret" type="Area2D"]
+scale = Vector2(3, 3)
 collision_layer = 2
 script = ExtResource("1_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_lnlfq")
 autoplay = "default"
 frame_progress = 0.0560749

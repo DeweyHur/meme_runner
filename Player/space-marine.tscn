@@ -371,7 +371,7 @@ script = ExtResource("1_23j4b")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -34)
-scale = Vector2(2, 2)
+scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_space_marine")
 animation = &"fall"
 autoplay = "idle"

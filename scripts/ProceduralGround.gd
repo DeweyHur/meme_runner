@@ -276,14 +276,12 @@ func create_ground_piece_with_edges(index: int, total_length: int, terrain_type:
 	collision.shape = shape
 	collision.position = Vector2(0, 0)
 	ground_piece.add_child(collision)
-	print("Created collision shape for piece %d with points: %s" % [index, str(shape.points) if shape is ConvexPolygonShape2D else "N/A"])
 
 	# Create visual representation
 	var visual = create_sloped_ground_visual(left_height, right_height, index, total_length, terrain_type)
 	ground_piece.add_child(visual)
 
 	ground_piece.position = Vector2(index * segment_width, 0)
-	print("Created ground piece %d, left: %.2f, right: %.2f" % [index, left_height, right_height])
 	
 	# Add method to get ground height
 	ground_piece.set_script(load("res://scripts/GroundPiece.gd"))
@@ -355,7 +353,6 @@ func validate_piece_connection(piece: StaticBody2D, index: int, total_length: in
 	else:
 		print("WARNING: Piece %d has non-polygon collision shape!" % index)
 		return
-	print("[DEBUG] Piece %d: left_height=%.2f, right_height=%.2f, points=%s" % [index, left_height, right_height, str(points)])
 	if index > 0:
 		var prev_piece = piece.get_parent().get_child(index - 1)
 		if prev_piece and prev_piece is StaticBody2D:
@@ -369,11 +366,8 @@ func validate_piece_connection(piece: StaticBody2D, index: int, total_length: in
 				if prev_poly.points.size() >= 2:
 					var prev_right_height = prev_poly.points[1].y
 					var diff = abs(prev_right_height - left_height)
-					print("[DEBUG] Piece %d: prev_piece right_edge=%.2f, this left_edge=%.2f, diff=%.2f" % [index, prev_right_height, left_height, diff])
 					if diff > tolerance:
 						print("WARNING: Piece %d left edge (%.2f) doesn't match previous piece right edge (%.2f). Diff: %.2f" % [index, left_height, prev_right_height, diff])
-					else:
-						print("Piece %d connects properly with previous piece (diff: %.2f)" % [index, diff])
 	if index < total_length - 1:
 		var next_piece = piece.get_parent().get_child(index + 1)
 		if next_piece and next_piece is StaticBody2D:
@@ -387,15 +381,11 @@ func validate_piece_connection(piece: StaticBody2D, index: int, total_length: in
 				if next_poly.points.size() >= 1:
 					var next_left_height = next_poly.points[0].y
 					var diff = abs(right_height - next_left_height)
-					print("[DEBUG] Piece %d: this right_edge=%.2f, next_piece left_edge=%.2f, diff=%.2f" % [index, right_height, next_left_height, diff])
 					if diff > tolerance:
 						print("WARNING: Piece %d right edge (%.2f) doesn't match next piece left edge (%.2f). Diff: %.2f" % [index, right_height, next_left_height, diff])
-					else:
-						print("Piece %d connects properly with next piece (diff: %.2f)" % [index, diff])
 	if abs(right_height - left_height) > 0.1:
 		var slope_angle = atan2(abs(right_height - left_height), segment_width)
 		var slope_degrees = slope_angle * 180.0 / PI
-		print("Piece %d slope: %.1f degrees (left: %.1f, right: %.1f)" % [index, slope_degrees, left_height, right_height])
 		if slope_degrees > 45.0:
 			print("WARNING: Piece %d has steep slope: %.1f degrees" % [index, slope_degrees])
 

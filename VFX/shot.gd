@@ -2,7 +2,7 @@ extends Area2D
 
 var speed = 300.0  # Default speed, will be overridden by player
 var direction = Vector2.RIGHT  # Direction vector for movement
-var bullet_type = "player"  # "player" or "turret"
+var bullet_type = "player"  # "player", "turret", or "boss"
 var has_hit = false
 
 @onready var animated_sprite = $AnimatedSprite2D
@@ -18,13 +18,13 @@ func _ready():
 	animated_sprite.play("fly")
 	
 	# Validate bullet type
-	if bullet_type != "player" and bullet_type != "turret":
+	if bullet_type != "player" and bullet_type != "turret" and bullet_type != "boss":
 		print("⚠️  WARNING: Invalid bullet type: %s" % bullet_type)
 		bullet_type = "player"  # Default to player bullet
 		print("   Set to default type: %s" % bullet_type)
 	
 	# Debug collision setup
-	print("🔫 Bullet created - Type: %s, Layer: 2, Mask: 3" % bullet_type)
+	print("🔫 Bullet created - Type: %s, Layer: %d, Mask: %d" % [bullet_type, collision_layer, collision_mask])
 
 func _physics_process(delta):
 	if not has_hit:
@@ -44,9 +44,9 @@ func _on_body_entered(body):
 		# Debug collision info
 		print("Bullet collision - Type: %s, Target: %s, Target Group: %s" % [bullet_type, body.name, "player" if body.is_in_group("player") else "other"])
 		
-		# Check if hit player (only for turret bullets)
-		if bullet_type == "turret" and body.is_in_group("player") and body.has_method("take_damage"):
-			print("✅ VALID: Turret bullet hit player!")
+		# Check if hit player (only for turret or boss bullets)
+		if (bullet_type == "turret" or bullet_type == "boss") and body.is_in_group("player") and body.has_method("take_damage"):
+			print("✅ VALID: %s bullet hit player!" % bullet_type.capitalize())
 			body.take_damage()
 		elif bullet_type == "player" and body.is_in_group("player"):
 			print("❌ INVALID: Player bullet hit player! This should not happen!")
@@ -70,8 +70,10 @@ func get_debug_info() -> String:
 	]
 
 func _on_area_entered(area):
+	print("Bullet area collision detected - Type: %s, Target: %s, Target groups: %s" % [bullet_type, area.name, str(area.get_groups())])
+	
 	if not has_hit and area.is_in_group("enemies"):
-		print("Bullet area collision - Type: %s, Target: %s" % [bullet_type, area.name])
+		print("✅ Bullet area collision - Type: %s, Target: %s (enemy confirmed)" % [bullet_type, area.name])
 		has_hit = true
 		
 		# Stop movement

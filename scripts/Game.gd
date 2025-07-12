@@ -9,6 +9,11 @@ var score = 0
 var game_speed = 1.0
 var player_position = 0.0
 
+# Life system variables
+var life = 100.0  # Start with 100 seconds of life
+var life_timer = 0.0  # Timer to track seconds
+var life_decrement_on_hit = 5.0  # Life lost when hit
+
 # Turret spawning variables
 var turret_scene = preload("res://Enemies/Turret/turret.tscn")
 var turret_spawn_timer = 0.0
@@ -29,6 +34,7 @@ var selected_character_path: String = "res://Player/tung.tscn"  # Default charac
 @onready var obstacle_spawner = $ObstacleSpawner
 @onready var obstacle_timer = $ObstacleSpawner/ObstacleTimer
 @onready var score_label = $UI/ScoreLabel
+@onready var life_label = $UI/LifeLabel
 @onready var instructions = $UI/Instructions
 @onready var procedural_ground = $ProceduralGround
 @onready var camera = $Camera2D
@@ -47,6 +53,9 @@ func _ready():
 	# Connect timer signal
 	obstacle_timer.timeout.connect(_on_obstacle_timer_timeout)
 	
+	# Initialize life display
+	update_life_display()
+	
 	# Hide instructions after 3 seconds
 	var timer = Timer.new()
 	add_child(timer)
@@ -56,6 +65,20 @@ func _ready():
 	timer.start()
 
 func _process(delta):
+	# Update life timer and decrement life every second
+	life_timer += delta
+	if life_timer >= 1.0:
+		life -= 1.0
+		life_timer = 0.0
+		update_life_display()
+		
+		# Check if life reached 0
+		if life <= 0:
+			life = 0
+			update_life_display()
+			game_over()
+			return
+	
 	# Update score based on distance traveled
 	if player:
 		score = int(player.position.x / 10)
@@ -182,7 +205,7 @@ func game_over():
 	
 	# Show game over screen
 	var game_over_label = Label.new()
-	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nPress R to restart"
+	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nLife Remaining: " + str(int(life)) + "\nPress R to restart"
 	game_over_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	game_over_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	game_over_label.anchors_preset = Control.PRESET_FULL_RECT
@@ -332,7 +355,7 @@ func show_victory_screen():
 	
 	# Victory label
 	var victory_label = Label.new()
-	victory_label.text = "VICTORY!\n\nBoss Defeated!\nFinal Score: " + str(score) + "\n\nPress SPACE to return to Main Menu"
+	victory_label.text = "VICTORY!\n\nBoss Defeated!\nFinal Score: " + str(score) + "\nLife Remaining: " + str(int(life)) + "\n\nPress SPACE to return to Main Menu"
 	victory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	victory_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	victory_label.anchors_preset = Control.PRESET_FULL_RECT
@@ -359,3 +382,26 @@ func replace_player_with_selected_character():
 			add_child(player)
 		else:
 			print("Failed to load character scene: ", selected_character_path) 
+
+func update_life_display():
+	if life_label:
+		life_label.text = "Life: " + str(int(life))
+		
+		# Change color based on life remaining
+		if life > 60:
+			life_label.add_theme_color_override("font_color", Color.GREEN)
+		elif life > 30:
+			life_label.add_theme_color_override("font_color", Color.YELLOW)
+		else:
+			life_label.add_theme_color_override("font_color", Color.RED)
+
+func player_took_damage():
+	# Called when player is hit
+	life -= life_decrement_on_hit
+	update_life_display()
+	
+	# Check if life reached 0
+	if life <= 0:
+		life = 0
+		update_life_display()
+		game_over() 

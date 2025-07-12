@@ -167,6 +167,11 @@ func take_damage():
 	# Set hurt velocity for smooth backward movement
 	hurt_velocity = Vector2(-300, 0)  # Move backward at 300 pixels per second
 	
+	# Signal the game scene that player took damage
+	var game_scene = get_parent()
+	if game_scene.has_method("player_took_damage"):
+		game_scene.player_took_damage()
+	
 	# Play hurt animation and wait
 	var timer = Timer.new()
 	add_child(timer)

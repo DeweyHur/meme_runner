@@ -1,10 +1,7 @@
 [gd_scene load_steps=11 format=3 uid="uid://dp4eet13bkkd8"]
 
-[ext_resource type="Script" path="res://Enemies/Turret/turret.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://1d0k5mdn4ksa" path="res://Enemies/Turret/turret-preview.png" id="1_eq3y1"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(20, 20)
+[ext_resource type="Script" uid="uid://b8dfyquw1qwra" path="res://Enemies/Turret/turret.gd" id="1_script"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v58w0"]
 atlas = ExtResource("1_eq3y1")
@@ -71,12 +68,14 @@ animations = [{
 "speed": 8.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+
 [node name="Turret" type="Area2D"]
 collision_layer = 2
-collision_mask = 1
 script = ExtResource("1_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_lnlfq")
 autoplay = "default"
 frame_progress = 0.0560749

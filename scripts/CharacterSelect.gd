@@ -171,12 +171,15 @@ func setup_character_grid():
 		existing_next_button.get_parent().remove_child(existing_next_button)
 		bottom_container.add_child(existing_next_button)
 		self.next_button = existing_next_button
+		# Make existing button bigger
+		self.next_button.custom_minimum_size = Vector2(300, 100)
+		self.next_button.add_theme_font_size_override("font_size", 20)
 	else:
 		self.next_button = Button.new()
 		self.next_button.text = "Next"
-		self.next_button.custom_minimum_size = Vector2(240, 80)
+		self.next_button.custom_minimum_size = Vector2(300, 100)
 		self.next_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		self.next_button.add_theme_font_size_override("font_size", 16)
+		self.next_button.add_theme_font_size_override("font_size", 20)
 		bottom_container.add_child(self.next_button)
 	
 	# Remove old spacer if it exists

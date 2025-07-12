@@ -16,11 +16,25 @@ var last_segment_end = 0.0
 var current_height = 500.0
 var target_height = 500.0
 var segments: Array[Node2D] = []
-var max_segments = 10  # Keep only this many segments in memory
+var max_segments = 20  # Keep only this many segments in memory
 var terrain_seed = 0
 
 func _ready():
+	# Try multiple ways to find the player
 	player = get_parent().get_node("Player")
+	if not player:
+		# Try finding by class
+		var potential_players = get_tree().get_nodes_in_group("player")
+		if potential_players.size() > 0:
+			player = potential_players[0]
+		else:
+			# Try finding by script
+			var all_nodes = get_tree().get_nodes_in_group("")
+			for node in all_nodes:
+				if node.has_method("get_velocity") and node is CharacterBody2D:
+					player = node
+					break
+	
 	if not player:
 		push_error("Player not found!")
 		return
@@ -33,23 +47,39 @@ func _ready():
 	generate_initial_ground()
 
 func _process(delta):
+	# Check if player reference is still valid
+	if not player or not is_instance_valid(player):
+		player = get_parent().get_node("Player")
+		if not player:
+			var potential_players = get_tree().get_nodes_in_group("player")
+			if potential_players.size() > 0:
+				player = potential_players[0]
+			else:
+				return
+	
 	if not player:
 		return
 	
 	# Check if we need to generate more ground
-	if player.position.x + 1000 > last_segment_end:
-		generate_next_segment()
+	var player_x = player.position.x
+	
+	if player_x + 1000 > last_segment_end:
+		# Check if we're at the segment limit
+		if segments.size() >= max_segments:
+			# Force cleanup of old segments
+			cleanup_old_segments()
+		
+		# Only generate if we're under the limit
+		if segments.size() < max_segments:
+			generate_next_segment()
 	
 	# Clean up old segments
 	cleanup_old_segments()
 
 func generate_initial_ground():
 	# Generate a few segments to start
-	print("Generating initial ground...")
 	for i in range(5):
-		print("Generating segment %d..." % i)
 		generate_next_segment()
-	print("Initial ground generation complete. Segments: %d" % segments.size())
 
 func generate_next_segment():
 	# Generate terrain type first
@@ -77,23 +107,19 @@ func generate_next_segment():
 		# Recalculate terrain type based on final height difference
 		if target_height > current_height:
 			terrain_type = "uphill"
-			print("Final validation: Converting to uphill slope (height diff: %.1f)" % final_height_diff)
 		else:
 			terrain_type = "downhill"
-			print("Final validation: Converting to downhill slope (height diff: %.1f)" % final_height_diff)
 		
 		# Adjust segment length for slopes
 		segment_length = slope_segment_length
 	
 	# Create the segment
-	print("Creating segment with length %d, terrain type: %s" % [segment_length, terrain_type])
 	var segment = create_ground_segment(segment_length, terrain_type)
 	
 	# Validate the segment
 	validate_ground_segment(segment, terrain_type)
 	
 	segments.append(segment)
-	print("Segment created and added. Total segments: %d" % segments.size())
 	
 	# Update positions
 	last_segment_end += segment_width * float(segment_length)
@@ -163,10 +189,8 @@ func convert_to_walkable_slope(height_change: float) -> String:
 	# If height difference is small, convert to walkable slope
 	if abs(height_change) < walkable_height_threshold:
 		if height_change > 0:
-			print("Converting small height change (%.1f) to uphill slope" % height_change)
 			return "uphill"
 		else:
-			print("Converting small height change (%.1f) to downhill slope" % height_change)
 			return "downhill"
 	return "normal"
 
@@ -185,7 +209,7 @@ func validate_ground_segment(segment: Node2D, terrain_type: String):
 				if child is CollisionShape2D:
 					# Ensure collision shape is valid
 					if child.shape:
-						print("Validated ground piece %d in segment %s" % [i, segment.name])
+						pass  # Validation successful
 
 func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	var segment = Node2D.new()
@@ -202,7 +226,6 @@ func create_ground_segment(length: int, terrain_type: String) -> Node2D:
 	for i in range(length):
 		var ground_piece = create_ground_piece_with_edges(i, length, terrain_type, edge_heights)
 		segment.add_child(ground_piece)
-		print("Added ground piece %d to segment" % i)
 
 	# Validate all piece connections after all pieces are created
 	for i in range(length):
@@ -534,7 +557,11 @@ func cleanup_old_segments():
 	var segments_to_remove = []
 	
 	for segment in segments:
-		if segment.position.x + segment_width * max_segment_length < player_x - 500:
+		var segment_end = segment.position.x + segment_width * max_segment_length
+		var distance_behind = player_x - segment_end
+		
+		# More aggressive cleanup - remove segments that are 300 units behind player
+		if distance_behind > 300:
 			segments_to_remove.append(segment)
 	
 	for segment in segments_to_remove:

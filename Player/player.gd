@@ -19,6 +19,13 @@ var hurt_velocity = Vector2.ZERO
 var hurt_timer = 0.0
 var debug_info = {}  # Store debug information
 
+# Slope handling variables
+var max_walkable_slope_angle = 25.0  # Maximum slope angle in degrees that player can walk on
+var slope_movement_enabled = true  # Whether to enable smooth slope movement
+var current_slope_angle = 0.0  # Current slope angle in degrees
+var slope_normal = Vector2.UP  # Normal vector of the current slope
+var debug_slope_info = false  # Enable to show slope debug info
+
 # Shooting variables
 var shoot_timer = 0.0
 var shoot_interval = 4.0  # Configurable shooting interval in seconds
@@ -49,9 +56,22 @@ func _physics_process(delta):
 		update_animations(0)  # No input during hurt
 		return
 	
-	# Add the gravity.
-	if not is_on_floor():
-		velocity.y += gravity * delta
+	# Detect slope information when on floor
+	if is_on_floor():
+		detect_slope_info()
+	else:
+		# Reset slope info when not on floor
+		current_slope_angle = 0.0
+		slope_normal = Vector2.UP
+	
+	# Handle slope movement
+	if is_on_floor() and slope_movement_enabled and abs(current_slope_angle) <= max_walkable_slope_angle:
+		# On gradual slope - apply slope-based movement
+		handle_slope_movement(delta)
+	else:
+		# Normal gravity when not on floor or on steep slopes
+		if not is_on_floor():
+			velocity.y += gravity * delta
 
 	# Handle Jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
@@ -91,6 +111,82 @@ func _physics_process(delta):
 	# Update jumping state
 	if is_on_floor() and is_jumping:
 		is_jumping = false
+
+func detect_slope_info():
+	# Get slope information from the ground we're standing on
+	var ground_info = get_ground_info_at_position()
+	if ground_info.has("normal"):
+		slope_normal = ground_info.normal
+		# Calculate slope angle from normal
+		var slope_radians = acos(slope_normal.y)
+		current_slope_angle = rad_to_deg(slope_radians)
+		
+		# Determine if slope is downward (negative angle)
+		if slope_normal.x > 0:  # Normal pointing right means downward slope
+			current_slope_angle = -current_slope_angle
+		
+		# Debug output
+		if debug_slope_info:
+			print("Slope detected - Angle: %.1f°, Normal: %s" % [current_slope_angle, slope_normal])
+	else:
+		# Fallback: assume flat ground
+		current_slope_angle = 0.0
+		slope_normal = Vector2.UP
+
+func get_ground_info_at_position() -> Dictionary:
+	# Try to get ground information from procedural ground system
+	var game_scene = get_parent()
+	if game_scene and game_scene.has_method("get_ground_info_at_position"):
+		return game_scene.get_ground_info_at_position(position.x)
+	
+	# Fallback: check collision with ground pieces
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+		
+		if collider and collider.has_method("get_ground_info_at_x"):
+			# Calculate x offset within the ground piece
+			var local_pos = collider.to_local(position)
+			return collider.get_ground_info_at_x(local_pos.x)
+	
+	# Default fallback
+	return {"height": position.y, "normal": Vector2.UP}
+
+func handle_slope_movement(delta):
+	# Calculate slope-based movement
+	var slope_radians = deg_to_rad(current_slope_angle)
+	
+	# For downward slopes, apply a gentle downward velocity
+	if current_slope_angle < 0:
+		# Calculate how much to move down based on slope angle
+		var slope_velocity = run_speed * sin(abs(slope_radians))
+		velocity.y = slope_velocity
+		
+		if debug_slope_info:
+			print("Downhill movement - Slope: %.1f°, Velocity Y: %.1f" % [current_slope_angle, slope_velocity])
+	else:
+		# For upward slopes, maintain current y velocity (gravity will handle it)
+		velocity.y = 0
+	
+	# Ensure we don't fall through the ground
+	if velocity.y > 0:
+		# Check if we're about to fall through
+		var ground_info = get_ground_info_at_position()
+		if ground_info.has("height"):
+			var ground_height = ground_info.height
+			if position.y + velocity.y * delta > ground_height:
+				velocity.y = 0
+				position.y = ground_height
+
+# Getter methods for debug overlay
+func get_current_slope_angle() -> float:
+	return current_slope_angle
+
+func get_slope_normal() -> Vector2:
+	return slope_normal
+
+func is_slope_movement_enabled() -> bool:
+	return slope_movement_enabled
 
 func update_animations(input_axis):
 	

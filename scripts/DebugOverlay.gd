@@ -104,6 +104,20 @@ func update_player_debug_info():
 		var slope_degrees = slope_angle * 180.0 / PI
 		player_info += "Slope Angle: %.1f°\n" % slope_degrees
 		
+		# Show slope movement information
+		if player.has_method("get_current_slope_angle"):
+			var current_slope = player.get_current_slope_angle()
+			player_info += "Current Slope: %.1f°\n" % current_slope
+		
+		if player.has_method("get_slope_normal"):
+			var slope_normal = player.get_slope_normal()
+			player_info += "Slope Normal: (%.3f, %.3f)\n" % [slope_normal.x, slope_normal.y]
+		
+		# Show slope movement status
+		if player.has_method("is_slope_movement_enabled"):
+			var slope_enabled = player.is_slope_movement_enabled()
+			player_info += "Slope Movement: %s\n" % ("Enabled" if slope_enabled else "Disabled")
+		
 		# Show debug info from player
 		if player.debug_info.has("slope_type"):
 			player_info += "Slope Type: %s\n" % player.debug_info["slope_type"]

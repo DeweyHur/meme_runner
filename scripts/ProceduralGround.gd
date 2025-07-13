@@ -608,4 +608,27 @@ func get_ground_info_at(x: float) -> Dictionary:
 					}
 	
 	# Default values if no segment found
-	return {"height": 500.0, "normal": Vector2.UP} 
+	return {"height": 500.0, "normal": Vector2.UP}
+
+# Function to regenerate the world for a new stage
+func regenerate_world():
+	print("Regenerating procedural world for new stage...")
+	
+	# Clear all existing segments
+	for segment in segments:
+		segment.queue_free()
+	segments.clear()
+	
+	# Reset generation state
+	last_segment_end = 0.0
+	current_height = 500.0
+	target_height = 500.0
+	
+	# Generate new random seed for different terrain
+	terrain_seed = randi()
+	seed(terrain_seed)
+	
+	# Generate initial ground for the new stage
+	generate_initial_ground()
+	
+	print("World regeneration complete! New terrain seed: %d" % terrain_seed) 

@@ -56,9 +56,7 @@ func update_hp_display():
 func show_hp_bar():
 	visible = true
 	is_visible = true
-	print("Boss HP bar shown")
 
 func hide_hp_bar():
 	visible = false
 	is_visible = false
-	print("Boss HP bar hidden") 

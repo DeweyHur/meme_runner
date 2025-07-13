@@ -106,12 +106,6 @@ func handle_boss_movement(delta):
 	# Debug movement info
 	if Engine.get_process_frames() % 120 == 0:  # Print every 2 seconds
 		var actual_x_distance = boss_pos.x - player_pos.x
-		print("Boss movement debug:")
-		print("  Player pos: %.1f" % player_pos.x)
-		print("  Boss pos: %.1f" % boss_pos.x)
-		print("  Target x: %.1f" % target_x)
-		print("  Current diff: %.1f" % current_x_diff)
-		print("  Actual distance: %.1f (target: %.1f)" % [actual_x_distance, boss_distance])
 	
 	# Move towards target x position if not close enough
 	if current_x_diff > 10:  # Small tolerance
@@ -236,19 +230,12 @@ func _on_body_entered(body):
 		body.take_damage()
 
 func _on_area_entered(area):
-	# Handle bullet collisions
-	print("Boss area collision - Target: %s, Groups: %s" % [area.name, str(area.get_groups())])
-	
+	# Handle bullet collisions	
 	if area.is_in_group("bullets"):
-		print("Boss hit by bullet - Type: %s" % area.bullet_type)
 		if area.bullet_type == "player":
 			print("✅ Boss taking damage from player bullet!")
 			take_damage(25)  # Player bullets do 25 damage
 			area.queue_free()  # Destroy the bullet
-		else:
-			print("ℹ️  Boss hit by non-player bullet: %s" % area.bullet_type)
-	else:
-		print("ℹ️  Boss area collision with non-bullet: %s" % area.name)
 
 func get_hp_percentage() -> float:
 	return float(current_hp) / float(max_hp) 

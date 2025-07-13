@@ -31,6 +31,9 @@ var shoot_timer = 0.0
 var shoot_interval = 4.0  # Configurable shooting interval in seconds
 var bullet_scene = preload("res://VFX/shot.tscn")
 
+# Shot cooldown indicator
+@onready var shot_cooldown_indicator = $ShotCooldownIndicator
+
 func _ready():
 	# Add player to group so turrets can find it
 	add_to_group("player")
@@ -70,11 +73,11 @@ func _physics_process(delta):
 		slope_normal = Vector2.UP
 	
 	# Handle slope movement
-	if is_on_floor() and slope_movement_enabled and abs(current_slope_angle) <= max_walkable_slope_angle:
-		# On gradual slope - apply slope-based movement
+	if is_on_floor() and slope_movement_enabled:
+		# On any slope - apply slope-based movement (prevents sliding)
 		handle_slope_movement(delta)
 	else:
-		# Normal gravity when not on floor or on steep slopes
+		# Normal gravity when not on floor
 		if not is_on_floor():
 			velocity.y += gravity * delta
 
@@ -116,6 +119,9 @@ func _physics_process(delta):
 	# Update jumping state
 	if is_on_floor() and is_jumping:
 		is_jumping = false
+	
+	# Update shot cooldown indicator
+	update_shot_cooldown_indicator()
 
 func detect_slope_info():
 	# Get slope information from the ground we're standing on
@@ -158,20 +164,17 @@ func get_ground_info_at_position() -> Dictionary:
 	return {"height": position.y, "normal": Vector2.UP}
 
 func handle_slope_movement(delta):
-	# Calculate slope-based movement
-	var slope_radians = deg_to_rad(current_slope_angle)
-	
-	# For downward slopes, apply a gentle downward velocity
-	if current_slope_angle < 0:
-		# Calculate how much to move down based on slope angle
-		var slope_velocity = run_speed * sin(abs(slope_radians))
-		velocity.y = slope_velocity
+	# When on the ground, prevent sliding down slopes
+	# This ensures the player stays stable on any slope angle
+	if is_on_floor():
+		# Keep player stable on slopes - no downward velocity
+		velocity.y = 0
 		
 		if debug_slope_info:
-			print("Downhill movement - Slope: %.1f°, Velocity Y: %.1f" % [current_slope_angle, slope_velocity])
+			print("Player on slope - Angle: %.1f°, Keeping stable (no sliding)" % current_slope_angle)
 	else:
-		# For upward slopes, maintain current y velocity (gravity will handle it)
-		velocity.y = 0
+		# Apply normal gravity when not on floor (jumping/falling)
+		velocity.y += gravity * delta
 	
 	# Ensure we don't fall through the ground
 	if velocity.y > 0:
@@ -192,6 +195,23 @@ func get_slope_normal() -> Vector2:
 
 func is_slope_movement_enabled() -> bool:
 	return slope_movement_enabled
+
+func update_shot_cooldown_indicator():
+	if shot_cooldown_indicator:
+		# Calculate progress (0.0 to 1.0)
+		var progress = shoot_timer / shoot_interval
+		progress = clamp(progress, 0.0, 1.0)
+		
+		# Update the indicator
+		shot_cooldown_indicator.value = progress * 100  # Convert to percentage
+		
+		# Change color based on progress
+		if progress >= 1.0:
+			shot_cooldown_indicator.modulate = Color(0, 1, 0, 0.8)  # Green - Ready to shoot
+		elif progress >= 0.7:
+			shot_cooldown_indicator.modulate = Color(1, 1, 0, 0.8)  # Yellow - Almost ready
+		else:
+			shot_cooldown_indicator.modulate = Color(1, 0, 0, 0.8)  # Red - Still charging
 
 func update_animations(input_axis):
 	
@@ -226,16 +246,20 @@ func check_collisions():
 		
 		# Only trigger game over for obstacles, not ground
 		if collider and collider.is_in_group("obstacles"):
+			print("Player hit obstacle! Calling game_over()")
 			game_over()
 
 func game_over():
-	print("Game Over!")
+	print("Player game_over() called!")
 	# Stop the player
 	velocity = Vector2.ZERO
 	# Signal the game scene
 	var game_scene = get_parent()
 	if game_scene.has_method("game_over"):
+		print("Calling game scene game_over()")
 		game_scene.game_over()
+	else:
+		print("ERROR: Game scene doesn't have game_over() method!")
 
 func shoot():
 	if not is_shooting:

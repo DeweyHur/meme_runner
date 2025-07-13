@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bqxvhqxqxqxqx"]
+[gd_scene load_steps=11 format=3 uid="uid://bqxvhqxqxqxqx"]
 
 [ext_resource type="PackedScene" uid="uid://hqfnafaag1yy" path="res://Player/tung.tscn" id="1_0x0x0"]
 [ext_resource type="Script" uid="uid://dg5avii0ujofr" path="res://scripts/Game.gd" id="2_0x0x0"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://3sksd0fw621u" path="res://World/parallax_background.tscn" id="7_0x0x0"]
 [ext_resource type="Script" uid="uid://bmlmwjjwfavph" path="res://scripts/BossHPBar.gd" id="8_0x0x0"]
 [ext_resource type="Script" uid="uid://bxl52873uf7cr" path="res://scripts/BossAlarm.gd" id="9_0x0x0"]
+[ext_resource type="PackedScene" path="res://scenes/StagePopup.tscn" id="10_0x0x0"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("2_0x0x0")
@@ -53,15 +54,25 @@ offset_right = -20.0
 offset_bottom = 110.0
 text = "Life: 100"
 
+[node name="StageLabel" type="Label" parent="UI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 120.0
+offset_right = -20.0
+offset_bottom = 150.0
+text = "Stage: 1"
+
 [node name="BossHPBar" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -300.0
-offset_top = 120.0
+offset_top = 160.0
 offset_right = -20.0
-offset_bottom = 160.0
+offset_bottom = 200.0
 grow_horizontal = 0
 script = ExtResource("8_0x0x0")
 
@@ -146,6 +157,8 @@ Press DOWN ARROW to slide
 Avoid obstacles!"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="StagePopup" parent="UI" instance=ExtResource("10_0x0x0")]
 
 [node name="DebugOverlay" type="CanvasLayer" parent="."]
 script = ExtResource("4_0x0x0")

@@ -20,10 +20,18 @@ var turret_spawn_timer = 0.0
 var turret_spawn_interval = 5.0  # Spawn turret every 5 seconds
 var turret_spawn_distance = 600.0  # Distance ahead of player to spawn turrets
 
+# Stage system variables
+var current_stage = 1
+var total_stages = 3
+var stage_start_distance = 0.0
+var stage_boss_distance = 5000.0  # Distance to spawn boss for each stage
+var stage_boss_alarm_distance = 4500.0  # Distance to show alarm before boss
+
+# Game state variables
+var is_game_over = false
+
 # Boss battle variables
 var boss_scene = preload("res://Enemies/Drone/drone.tscn")  # We'll modify this to use boss script
-var boss_spawn_distance = 10000.0  # Distance to spawn boss (10k)
-var boss_alarm_distance = 9500.0  # Distance to show alarm (500 units before boss)
 var boss_spawned = false
 var boss_active = false
 var boss_alarm_shown = false
@@ -35,11 +43,13 @@ var selected_character_path: String = "res://Player/tung.tscn"  # Default charac
 @onready var obstacle_timer = $ObstacleSpawner/ObstacleTimer
 @onready var score_label = $UI/ScoreLabel
 @onready var life_label = $UI/LifeLabel
+@onready var stage_label = $UI/StageLabel
 @onready var instructions = $UI/Instructions
 @onready var procedural_ground = $ProceduralGround
 @onready var camera = $Camera2D
 @onready var boss_hp_bar = $UI/BossHPBar
 @onready var boss_alarm = $UI/BossAlarm
+@onready var stage_popup = $UI/StagePopup
 
 func _ready():
 	# Check if we have a character selection from the previous scene
@@ -63,6 +73,23 @@ func _ready():
 	timer.one_shot = true
 	timer.timeout.connect(_hide_instructions)
 	timer.start()
+	
+	# Initialize stage popup
+	if stage_popup:
+		stage_popup.stage_completed.connect(_on_stage_completed)
+		stage_popup.game_completed.connect(_on_game_completed)
+		stage_popup.show_stage_popup(current_stage, false)
+		
+		# Hide stage popup after 3 seconds for initial stage
+		var stage_timer = Timer.new()
+		add_child(stage_timer)
+		stage_timer.wait_time = 3.0
+		stage_timer.one_shot = true
+		stage_timer.timeout.connect(func(): 
+			if stage_popup:
+				stage_popup.visible = false
+		)
+		stage_timer.start()
 
 func _process(delta):
 	# Update life timer and decrement life every second
@@ -76,6 +103,7 @@ func _process(delta):
 		if life <= 0:
 			life = 0
 			update_life_display()
+			print("Life reached 0, calling game_over()")
 			game_over()
 			return
 	
@@ -83,6 +111,10 @@ func _process(delta):
 	if player:
 		score = int(player.position.x / 10)
 		score_label.text = "Score: " + str(score)
+		
+		# Update stage display
+		if stage_label:
+			stage_label.text = "Stage: " + str(current_stage)
 		
 		# Increase game speed over time
 		game_speed = 1.0 + (score / 1000.0)
@@ -98,13 +130,16 @@ func _process(delta):
 		spawn_turret()
 		turret_spawn_timer = 0.0
 	
-	# Handle boss alarm and spawning
-	if not boss_alarm_shown and player.position.x >= boss_alarm_distance:
+	# Handle boss alarm and spawning for current stage
+	var current_boss_alarm_distance = stage_start_distance + stage_boss_alarm_distance
+	var current_boss_spawn_distance = stage_start_distance + stage_boss_distance
+	
+	if not boss_alarm_shown and player.position.x >= current_boss_alarm_distance:
 		show_boss_alarm()
 		boss_alarm_shown = true
 	
-	if not boss_spawned and player.position.x >= boss_spawn_distance:
-		print("Player reached %.0f x position, spawning boss!" % boss_spawn_distance)
+	if not boss_spawned and player.position.x >= current_boss_spawn_distance:
+		print("Player reached %.0f x position, spawning boss for stage %d!" % [current_boss_spawn_distance, current_stage])
 		hide_boss_alarm()
 		spawn_boss()
 
@@ -200,28 +235,40 @@ func _hide_instructions():
 	instructions.visible = false
 
 func game_over():
+	if is_game_over:
+		return  # Prevent multiple game over calls
+	
+	is_game_over = true
+	
 	# Stop spawning obstacles
 	obstacle_timer.stop()
 	
 	# Show game over screen
 	var game_over_label = Label.new()
-	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nLife Remaining: " + str(int(life)) + "\nPress R to restart"
+	game_over_label.name = "GameOverLabel"
+	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nStage Reached: " + str(current_stage) + "\nPress SPACE to return to Main Menu"
 	game_over_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	game_over_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	game_over_label.anchors_preset = Control.PRESET_FULL_RECT
 	game_over_label.add_theme_font_size_override("font_size", 32)
+	game_over_label.add_theme_color_override("font_color", Color.RED)
 	
 	$UI.add_child(game_over_label)
 	
-	# Listen for restart input
+	# Listen for input to return to main menu
 	set_process_input(true)
+	
+	print("Game Over! Final Score: %d, Stage Reached: %d" % [score, current_stage])
 
 func _input(event):
-	if event.is_action_pressed("ui_accept") and get_tree().paused:
-		restart_game()
-	elif event.is_action_pressed("ui_accept") and boss_active == false and boss_spawned:
-		# Return to main menu after victory
-		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	if event.is_action_pressed("ui_accept"):
+		if is_game_over:
+			print("Game over detected, returning to main menu")
+			# Return to main menu on game over
+			get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+		elif boss_active == false and boss_spawned and not stage_popup.visible:
+			# Return to main menu after victory (legacy support)
+			get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 func restart_game():
 	get_tree().paused = false
@@ -328,15 +375,20 @@ func spawn_boss():
 		print("Failed to load boss script!")
 
 func boss_defeated():
-	print("Boss defeated! Player wins!")
+	print("Boss defeated for stage %d!" % current_stage)
 	boss_active = false
 	
 	# Hide boss HP bar
 	if boss_hp_bar:
 		boss_hp_bar.hide_hp_bar()
 	
-	# Show victory screen
-	show_victory_screen()
+	# Show stage popup for completion
+	if stage_popup:
+		if current_stage < total_stages:
+			stage_popup.show_stage_popup(current_stage, true)
+		else:
+			# Final stage completed
+			stage_popup.show_game_completion()
 
 func show_victory_screen():
 	# Stop spawning enemies
@@ -397,11 +449,71 @@ func update_life_display():
 
 func player_took_damage():
 	# Called when player is hit
+	print("Player took damage! Life before: %.1f" % life)
 	life -= life_decrement_on_hit
 	update_life_display()
+	print("Player took damage! Life after: %.1f" % life)
 	
 	# Check if life reached 0
 	if life <= 0:
 		life = 0
 		update_life_display()
-		game_over() 
+		print("Player life reached 0 from damage, calling game_over()")
+		game_over()
+
+func _on_stage_completed():
+	# Proceed to next stage
+	current_stage += 1
+	stage_start_distance = player.position.x
+	
+	# Reset player life to 100 for new stage
+	life = 100.0
+	life_timer = 0.0
+	update_life_display()
+	
+	# Reset boss state for new stage
+	boss_spawned = false
+	boss_active = false
+	boss_alarm_shown = false
+	if boss:
+		boss.queue_free()
+		boss = null
+	
+	# Hide boss HP bar
+	if boss_hp_bar:
+		boss_hp_bar.hide_hp_bar()
+	
+	# Clear existing enemies and obstacles
+	clear_stage_enemies()
+	
+	# Regenerate the procedural world for the new stage
+	if procedural_ground and procedural_ground.has_method("regenerate_world"):
+		procedural_ground.regenerate_world()
+	
+	# Respawn the character for the new stage
+	replace_player_with_selected_character()
+	
+	# Show stage popup for new stage
+	if stage_popup:
+		stage_popup.show_stage_popup(current_stage, false)
+	
+	print("Proceeding to stage %d with regenerated world and fresh character (life: 100)" % current_stage)
+
+func clear_stage_enemies():
+	# Clear all turrets
+	var turrets = get_tree().get_nodes_in_group("enemies")
+	for turret in turrets:
+		if turret and is_instance_valid(turret):
+			turret.queue_free()
+	
+	# Clear all obstacles
+	var obstacles = get_tree().get_nodes_in_group("obstacles")
+	for obstacle in obstacles:
+		if obstacle and is_instance_valid(obstacle):
+			obstacle.queue_free()
+	
+	print("Cleared %d enemies and %d obstacles for new stage" % [turrets.size(), obstacles.size()])
+
+func _on_game_completed():
+	# Show final victory screen
+	show_victory_screen()

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c5lvtw6fivry6"]
 
-[ext_resource type="Script" path="res://scripts/StagePopup.gd" id="1_0x0x0"]
+[ext_resource type="Script" uid="uid://dwsrnyntio7r" path="res://scripts/StagePopup.gd" id="1_0x0x0"]
 
 [node name="StagePopup" type="Control"]
 layout_mode = 3
@@ -39,23 +39,10 @@ layout_mode = 2
 text = "Stage 1: City Streets"
 horizontal_alignment = 1
 vertical_alignment = 1
-add_theme_font_size_override("font_size", 24)
-add_theme_color_override("font_color", Color.YELLOW)
-
-[node name="HSeparator" type="HSeparator" parent="PopupContainer"]
-layout_mode = 2
 
 [node name="ProgressLabel" type="Label" parent="PopupContainer"]
 layout_mode = 2
-text = "Stage 1 of 3
-
-Defeat the boss to proceed!"
+text = "Continue to Next Stage"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
-add_theme_font_size_override("font_size", 18)
-add_theme_color_override("font_color", Color.WHITE)
-
-[node name="ContinueButton" type="Button" parent="PopupContainer"]
-layout_mode = 2
-text = "Continue to Next Stage" 

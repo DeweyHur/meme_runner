@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://chq3n4pj5etf2"
+path="res://.godot/imported/Tung Tung Tung Sahur.mp3-eb6863b32879de2d48815b088f921405.mp3str"
+
+[deps]
+
+source_file="res://Music/Tung Tung Tung Sahur.mp3"
+dest_files=["res://.godot/imported/Tung Tung Tung Sahur.mp3-eb6863b32879de2d48815b088f921405.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

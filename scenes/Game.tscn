@@ -5,11 +5,11 @@
 [ext_resource type="Script" uid="uid://bwijt0toe31yu" path="res://scripts/ProceduralGround.gd" id="3_0x0x0"]
 [ext_resource type="Script" uid="uid://bnwdi5skpif7x" path="res://scripts/DebugOverlay.gd" id="4_0x0x0"]
 [ext_resource type="Script" uid="uid://vu2rh3mbcquj" path="res://scripts/CollisionVisualizer.gd" id="5_0x0x0"]
-[ext_resource type="AudioStream" uid="uid://d2qgefq70aowe" path="res://Music/cyber_runner.ogg" id="6_0x0x0"]
 [ext_resource type="PackedScene" uid="uid://3sksd0fw621u" path="res://World/parallax_background.tscn" id="7_0x0x0"]
 [ext_resource type="Script" uid="uid://bmlmwjjwfavph" path="res://scripts/BossHPBar.gd" id="8_0x0x0"]
 [ext_resource type="Script" uid="uid://bxl52873uf7cr" path="res://scripts/BossAlarm.gd" id="9_0x0x0"]
-[ext_resource type="PackedScene" path="res://scenes/StagePopup.tscn" id="10_0x0x0"]
+[ext_resource type="PackedScene" uid="uid://c5lvtw6fivry6" path="res://scenes/StagePopup.tscn" id="10_0x0x0"]
+[ext_resource type="AudioStream" uid="uid://chq3n4pj5etf2" path="res://Music/Tung Tung Tung Sahur.mp3" id="10_qy1jj"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("2_0x0x0")
@@ -167,5 +167,5 @@ script = ExtResource("4_0x0x0")
 script = ExtResource("5_0x0x0")
 
 [node name="BGM" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("6_0x0x0")
+stream = ExtResource("10_qy1jj")
 autoplay = true

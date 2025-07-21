@@ -7,8 +7,8 @@
 [node name="ParallaxBackground" type="ParallaxBackground"]
 
 [node name="ParallaxLayerSky" type="ParallaxLayer" parent="."]
-motion_scale = Vector2(0.2, 0)
-motion_mirroring = Vector2(1024, 0)
+motion_scale = Vector2(0.3, 0)
+motion_mirroring = Vector2(2000, 0)
 
 [node name="TextureRect" type="TextureRect" parent="ParallaxLayerSky"]
 offset_left = 17.0
@@ -16,7 +16,7 @@ offset_top = -106.0
 offset_right = 1041.0
 offset_bottom = 1930.07
 texture = ExtResource("1_yy5y5")
-expand_mode = 1
+expand_mode = 2
 stretch_mode = 4
 
 [node name="ParallaxLayerBuildings" type="ParallaxLayer" parent="."]
@@ -28,9 +28,9 @@ anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = -6.0
-offset_top = 30.0
+offset_top = 70.0
 offset_right = 1002.0
-offset_bottom = 1038.0
+offset_bottom = 1078.0
 grow_vertical = 2
 texture = ExtResource("2_2sxya")
 expand_mode = 4
@@ -41,9 +41,10 @@ motion_scale = Vector2(0.7, 0.5)
 motion_mirroring = Vector2(986, 0)
 
 [node name="TextureRect" type="TextureRect" parent="ParallaxLayerNearBuildings"]
-offset_top = 31.0
+offset_top = 20.0
 offset_right = 986.0
-offset_bottom = 1017.0
+offset_bottom = 1006.0
+scale = Vector2(0.7, 0.7)
 texture = ExtResource("3_cbknn")
 expand_mode = 4
 stretch_mode = 4

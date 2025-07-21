@@ -20,6 +20,7 @@ transform = Transform2D(2, 0, 0, 2, 0, 0)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(100, 300)
+offset = Vector2(400, 0)
 
 [node name="Player" parent="." instance=ExtResource("1_0x0x0")]
 

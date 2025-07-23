@@ -1,20 +1,10 @@
-[gd_scene load_steps=113 format=3 uid="uid://fs80hbi8xrpb"]
+[gd_scene load_steps=117 format=3 uid="uid://fs80hbi8xrpb"]
 
 [ext_resource type="Script" uid="uid://cs074l22h6bmu" path="res://Player/player.gd" id="1_23j4b"]
 [ext_resource type="Texture2D" uid="uid://cswsic4vc75cr" path="res://Player/space-marine/Sprites/Idle/sprites/idle1.png" id="1_idle1"]
 [ext_resource type="Texture2D" uid="uid://bpd0xgenuxj73" path="res://Player/space-marine/Sprites/Idle/sprites/idle2.png" id="1_idle2"]
 [ext_resource type="Texture2D" uid="uid://bnf3cbuwy50f3" path="res://Player/space-marine/Sprites/Idle/sprites/idle3.png" id="1_idle3"]
 [ext_resource type="Texture2D" uid="uid://cfx48ximqqcv1" path="res://Player/space-marine/Sprites/Idle/sprites/idle4.png" id="1_idle4"]
-[ext_resource type="Texture2D" uid="uid://u87wxcbqdcwq" path="res://Player/space-marine/Sprites/Run/sprites/run1.png" id="2_run1"]
-[ext_resource type="Texture2D" uid="uid://beilo77ap068j" path="res://Player/space-marine/Sprites/Run/sprites/run2.png" id="2_run2"]
-[ext_resource type="Texture2D" uid="uid://cp04qtfsqdut1" path="res://Player/space-marine/Sprites/Run/sprites/run3.png" id="2_run3"]
-[ext_resource type="Texture2D" uid="uid://cji81kjjtqh3l" path="res://Player/space-marine/Sprites/Run/sprites/run4.png" id="2_run4"]
-[ext_resource type="Texture2D" uid="uid://pkm70wlxyi2j" path="res://Player/space-marine/Sprites/Run/sprites/run5.png" id="2_run5"]
-[ext_resource type="Texture2D" uid="uid://g2j2g2fi77kv" path="res://Player/space-marine/Sprites/Run/sprites/run6.png" id="2_run6"]
-[ext_resource type="Texture2D" uid="uid://dp4sj6ruxb6pa" path="res://Player/space-marine/Sprites/Run/sprites/run7.png" id="2_run7"]
-[ext_resource type="Texture2D" uid="uid://deq20fhymfp3q" path="res://Player/space-marine/Sprites/Run/sprites/run8.png" id="2_run8"]
-[ext_resource type="Texture2D" uid="uid://bvuyi5fo7yyib" path="res://Player/space-marine/Sprites/Run/sprites/run9.png" id="2_run9"]
-[ext_resource type="Texture2D" uid="uid://ceid7sfjtniec" path="res://Player/space-marine/Sprites/Run/sprites/run10.png" id="2_run10"]
 [ext_resource type="Texture2D" uid="uid://bdvf8esw71o44" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch1.png" id="4_crouch1"]
 [ext_resource type="Texture2D" uid="uid://sgickaq31eoy" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch2.png" id="4_crouch2"]
 [ext_resource type="Texture2D" uid="uid://dpebaiebshtvx" path="res://Player/space-marine/Sprites/Crouch/sprites/crouch3.png" id="4_crouch3"]
@@ -64,6 +54,7 @@
 [ext_resource type="Texture2D" uid="uid://ddcmomai8ptxk" path="res://Player/space-marine/Sprites/Throw/sprites/throw8.png" id="14_throw8"]
 [ext_resource type="Texture2D" uid="uid://bucbfeynqq6aa" path="res://Player/space-marine/tra_attack.png" id="22_1n2j1"]
 [ext_resource type="Texture2D" uid="uid://d2yhw82u2odu3" path="res://Player/Assets/tralla_jump.png" id="31_k4aw8"]
+[ext_resource type="Texture2D" uid="uid://co121e4dx0hvt" path="res://Player/Assets/tralla_run.png" id="37_4ash2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qx64l"]
 atlas = ExtResource("22_1n2j1")
@@ -147,6 +138,58 @@ region = Rect2(2304, 896, 768, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bf4yq"]
 atlas = ExtResource("31_k4aw8")
+region = Rect2(0, 1344, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t5rrl"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(0, 0, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k25ay"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(768, 0, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_21ppt"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(1536, 0, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hy084"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(2304, 0, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uegyn"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(0, 448, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_erg8q"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(768, 448, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_15y0j"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(1536, 448, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8g5nq"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(2304, 448, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4aw8"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(0, 896, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_im2do"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(768, 896, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tm1tr"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(1536, 896, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5nqcb"]
+atlas = ExtResource("37_4ash2")
+region = Rect2(2304, 896, 768, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0glmh"]
+atlas = ExtResource("37_4ash2")
 region = Rect2(0, 1344, 768, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4pux5"]
@@ -465,34 +508,43 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_run1")
+"texture": SubResource("AtlasTexture_t5rrl")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run2")
+"texture": SubResource("AtlasTexture_k25ay")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run3")
+"texture": SubResource("AtlasTexture_21ppt")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run4")
+"texture": SubResource("AtlasTexture_hy084")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run5")
+"texture": SubResource("AtlasTexture_uegyn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run6")
+"texture": SubResource("AtlasTexture_erg8q")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run7")
+"texture": SubResource("AtlasTexture_15y0j")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run8")
+"texture": SubResource("AtlasTexture_8g5nq")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run9")
+"texture": SubResource("AtlasTexture_k4aw8")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_run10")
+"texture": SubResource("AtlasTexture_im2do")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tm1tr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5nqcb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0glmh")
 }],
 "loop": true,
 "name": &"run",
@@ -653,7 +705,7 @@ script = ExtResource("1_23j4b")
 position = Vector2(0, -34)
 scale = Vector2(0.7, 0.7)
 sprite_frames = SubResource("SpriteFrames_space_marine")
-animation = &"crouch_gun"
+animation = &"run"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

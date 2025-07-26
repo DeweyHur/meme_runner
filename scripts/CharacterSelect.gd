@@ -13,17 +13,23 @@ var hovered_card: Control = null
 # Character data
 var characters = [
 	{
-		"name": "Classic Runner",
+		"name": "Tung tung tung Sahur",
 		"description": "Simple animations\nPerfect for beginners",
 		"scene_path": "res://Player/tung.tscn",
 		"preview_scene": preload("res://Player/tung.tscn")
 	},
 	{
-		"name": "Space Marine", 
+		"name": "Tralalero Tralala", 
 		"description": "Rich animations with gun variants\nFor experienced players",
 		"scene_path": "res://Player/space-marine.tscn",
-		"preview_scene": preload("res://Player/space-marine.tscn")
-	}
+		"preview_scene": preload("res://Player/trallo.tscn")
+	},
+	{
+		"name": "Cappucino Assasino", 
+		"description": "Rich animations with gun variants\nFor experienced players",
+		"scene_path": "res://Player/space-marine.tscn",
+		"preview_scene": preload("res://Player/capuccino.tscn")
+	},	
 ]
 
 func _ready():
@@ -86,11 +92,11 @@ func log_character_positions():
 			print("  Is Selected: ", card.get_meta("is_selected", false))
 			
 			# Calculate the center of the card
-			var card_center = card_position + card_size / 2
+			var card_center = card_position + card_size / 3
 			print("  Card Center: ", card_center)
 			
 			# Calculate the center of the viewport
-			var viewport_center = viewport_position + viewport_size / 2
+			var viewport_center = viewport_position + viewport_size / 3
 			print("  Viewport Center: ", viewport_center)
 			
 			# Calculate offset from card center
@@ -98,7 +104,7 @@ func log_character_positions():
 			print("  Offset from Card Center: ", offset_from_center)
 			
 			# Calculate offset from viewport center
-			var offset_from_viewport_center = character_position - viewport_size / 2
+			var offset_from_viewport_center = character_position - viewport_size / 3
 			print("  Offset from Viewport Center: ", offset_from_viewport_center)
 			
 			# Debug visibility info
@@ -129,7 +135,7 @@ func setup_character_grid():
 	
 	# Create the character grid
 	character_grid = GridContainer.new()
-	character_grid.columns = 2
+	character_grid.columns = 3
 	character_grid.add_theme_constant_override("h_separation", 40)
 	character_grid.add_theme_constant_override("v_separation", 40)
 	character_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -236,7 +242,7 @@ func create_character_card(character_data: Dictionary, index: int) -> Control:
 	# Character preview container
 	var preview_container = Control.new()
 	preview_container.name = "PreviewContainer_" + character_data["name"].replace(" ", "_")
-	preview_container.custom_minimum_size = Vector2(200, 120)  # Reduced height to better align with button
+	preview_container.custom_minimum_size = Vector2(200, 240)  # Reduced height to better align with button
 	preview_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	preview_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	
@@ -249,7 +255,7 @@ func create_character_card(character_data: Dictionary, index: int) -> Control:
 	# SubViewport for character preview
 	var viewport = SubViewport.new()
 	viewport.name = "Viewport_" + character_data["name"].replace(" ", "_")
-	viewport.size = Vector2i(200, 120)  # Match container size
+	viewport.size = Vector2i(200, 350)  # Match container size
 	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE  # Only update when visible
 	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS  # Always clear
 	viewport.transparent_bg = true  # Enable transparent background

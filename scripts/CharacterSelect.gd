@@ -21,13 +21,13 @@ var characters = [
 	{
 		"name": "Tralalero Tralala", 
 		"description": "Rich animations with gun variants\nFor experienced players",
-		"scene_path": "res://Player/space-marine.tscn",
+		"scene_path": "res://Player/trallo.tscn",
 		"preview_scene": preload("res://Player/trallo.tscn")
 	},
 	{
 		"name": "Cappucino Assasino", 
 		"description": "Rich animations with gun variants\nFor experienced players",
-		"scene_path": "res://Player/space-marine.tscn",
+		"scene_path": "res://Player/trallo.tscn",
 		"preview_scene": preload("res://Player/capuccino.tscn")
 	},	
 ]

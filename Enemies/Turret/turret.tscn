@@ -1,67 +1,31 @@
-[gd_scene load_steps=11 format=3 uid="uid://dp4eet13bkkd8"]
+[gd_scene load_steps=5 format=3 uid="uid://dp4eet13bkkd8"]
 
-[ext_resource type="Texture2D" uid="uid://1d0k5mdn4ksa" path="res://Enemies/Turret/turret-preview.png" id="1_eq3y1"]
 [ext_resource type="Script" uid="uid://b8dfyquw1qwra" path="res://Enemies/Turret/turret.gd" id="1_script"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_v58w0"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(0, 0, 25, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1emir"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(25, 0, 25, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_pktrd"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(50, 0, 25, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ytllq"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(75, 0, 25, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_p23le"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(100, 0, 25, 23)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_spv7v"]
-atlas = ExtResource("1_eq3y1")
-region = Rect2(125, 0, 25, 23)
+[ext_resource type="Texture2D" uid="uid://cybtr6k4gvtls" path="res://Enemies/Bombini-Gusini-TikTok-Meme-Viral-Trend.png" id="2_uq8os"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_lnlfq"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_v58w0")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_1emir")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_pktrd")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ytllq")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_p23le")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_p23le")
+"texture": ExtResource("2_uq8os")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ytllq")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_pktrd")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1emir")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_spv7v")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_spv7v")
+"texture": ExtResource("2_uq8os")
 }],
 "loop": true,
 "name": &"default",
@@ -69,6 +33,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(51.6667, 32.6667)
 
 [node name="Turret" type="Area2D"]
 scale = Vector2(3, 3)
@@ -76,9 +41,11 @@ collision_layer = 2
 script = ExtResource("1_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_lnlfq")
 autoplay = "default"
 frame_progress = 0.0560749
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-0.500001, 2.33333)
 shape = SubResource("RectangleShape2D_1")

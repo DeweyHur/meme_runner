@@ -289,18 +289,18 @@ func spawn_turret():
 	# Spawn turret
 	var turret = turret_scene.instantiate()
 	add_child(turret)
-	turret.global_position = Vector2(spawn_x, ground_info.height - 25)  # Position on ground
+	turret.global_position = Vector2(spawn_x, ground_info.height - 60)  # Position on ground
 	
 	# Orient turret orthogonal to ground normal
-	if ground_info.normal != Vector2.ZERO:
-		var ground_angle = ground_info.normal.angle()
-		var turret_rotation = ground_angle + PI/2  # Add 90 degrees to be orthogonal
-		turret.rotation = turret_rotation
-		print("Spawned turret at position: %s with rotation: %.2f° (ground normal: %s)" % [
-			turret.global_position, rad_to_deg(turret_rotation), ground_info.normal
-		])
-	else:
-		print("Spawned turret at position: ", turret.global_position)
+	#if ground_info.normal != Vector2.ZERO:
+		#var ground_angle = ground_info.normal.angle()
+		#var turret_rotation = ground_angle + PI/2  # Add 90 degrees to be orthogonal
+		#turret.rotation = turret_rotation
+		#print("Spawned turret at position: %s with rotation: %.2f° (ground normal: %s)" % [
+			#turret.global_position, rad_to_deg(turret_rotation), ground_info.normal
+		#])
+	#else:
+		#print("Spawned turret at position: ", turret.global_position)
 	
 	# Add cleanup timer for turrets
 	var cleanup_timer = Timer.new()

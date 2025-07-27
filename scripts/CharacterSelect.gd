@@ -10,6 +10,12 @@ var selected_character_path: String = ""
 var character_cards: Array[Control] = []
 var hovered_card: Control = null
 
+# Shared character preview variables
+var shared_character_instance: Node = null
+var shared_ground: StaticBody2D = null
+var shared_viewport: SubViewport = null
+var shared_camera: Camera2D = null
+
 # Character data
 var characters = [
 	{
@@ -40,7 +46,7 @@ func _ready():
 	if characters.size() > 0:
 		selected_character_path = characters[0]["scene_path"]
 		update_next_button_state()
-		update_character_animations()
+		update_shared_character_preview()
 	
 	# Start position logging timer
 	start_position_logging()
@@ -62,68 +68,43 @@ func _on_position_log_timer_timeout():
 
 func log_character_positions():
 	print("=== Character Position Log ===")
+	
+	# Log shared character position
+	if shared_character_instance:
+		var character_position = shared_character_instance.position
+		var character_global_position = shared_character_instance.global_position
+		
+		print("Shared Character:")
+		print("  Character Local Position: ", character_position)
+		print("  Character Global Position: ", character_global_position)
+		print("  Character Visible: ", shared_character_instance.visible)
+		print("  Character Modulate: ", shared_character_instance.modulate)
+		
+		# Get animated sprite info
+		var animated_sprite = shared_character_instance.get_node_or_null("AnimatedSprite2D")
+		if animated_sprite:
+			print("  AnimatedSprite Frame: ", animated_sprite.frame)
+			print("  AnimatedSprite Animation: ", animated_sprite.animation)
+			print("  AnimatedSprite Visible: ", animated_sprite.visible)
+			print("  AnimatedSprite Flip H: ", animated_sprite.flip_h)
+		else:
+			print("  AnimatedSprite: Not found")
+	else:
+		print("Shared Character: Not found!")
+	
+	# Log card positions
 	for i in range(character_cards.size()):
 		var card = character_cards[i]
-		var character_instance = card.get_meta("character_instance", null)
 		var character_data = card.get_meta("character_data", {})
 		var character_name = character_data.get("name", "Unknown")
+		var card_position = card.global_position
+		var card_size = card.size
 		
-		if character_instance:
-			var character_position = character_instance.position
-			var card_position = card.global_position
-			var card_size = card.size
-			var character_global_position = character_instance.global_position
-			
-			# Get the viewport that contains the character
-			var viewport = character_instance.get_parent()
-			var viewport_size = Vector2(viewport.size) if viewport else Vector2.ZERO
-			
-			# Get the preview container (parent of viewport) for position
-			var preview_container = viewport.get_parent() if viewport else null
-			var viewport_position = preview_container.global_position if preview_container else Vector2.ZERO
-			
-			print("Character: ", character_name)
-			print("  Character Local Position: ", character_position)
-			print("  Character Global Position: ", character_global_position)
-			print("  Viewport Global Position: ", viewport_position)
-			print("  Viewport Size: ", viewport_size)
-			print("  Card Global Position: ", card_position)
-			print("  Card Size: ", card_size)
-			print("  Is Selected: ", card.get_meta("is_selected", false))
-			
-			# Calculate the center of the card
-			var card_center = card_position + card_size / 3
-			print("  Card Center: ", card_center)
-			
-			# Calculate the center of the viewport
-			var viewport_center = viewport_position + viewport_size / 3
-			print("  Viewport Center: ", viewport_center)
-			
-			# Calculate offset from card center
-			var offset_from_center = character_global_position - card_center
-			print("  Offset from Card Center: ", offset_from_center)
-			
-			# Calculate offset from viewport center
-			var offset_from_viewport_center = character_position - viewport_size / 3
-			print("  Offset from Viewport Center: ", offset_from_viewport_center)
-			
-			# Debug visibility info
-			print("  Character Visible: ", character_instance.visible)
-			print("  Character Modulate: ", character_instance.modulate)
-			
-			# Get animated sprite size and frame info
-			var animated_sprite = character_instance.get_node_or_null("AnimatedSprite2D")
-			if animated_sprite:
-				print("  AnimatedSprite Frame: ", animated_sprite.frame)
-				print("  AnimatedSprite Animation: ", animated_sprite.animation)
-				print("  AnimatedSprite Visible: ", animated_sprite.visible)
-				print("  AnimatedSprite SpriteFrames: ", "Has frames" if animated_sprite.sprite_frames else "No frames")
-			else:
-				print("  AnimatedSprite: Not found")
-				
-			print("  Viewport Children Count: ", viewport.get_child_count() if viewport else 0)
-		else:
-			print("Character: ", character_name, " - Instance not found!")
+		print("Card ", i, " (", character_name, "):")
+		print("  Card Global Position: ", card_position)
+		print("  Card Size: ", card_size)
+		print("  Is Selected: ", card.get_meta("is_selected", false))
+	
 	print("==============================")
 
 func setup_character_grid():
@@ -133,6 +114,9 @@ func setup_character_grid():
 		print("Error: MainContainer not found!")
 		return
 	
+	# Create shared character preview area
+	setup_shared_character_preview(main_container)
+	
 	# Create the character grid
 	character_grid = GridContainer.new()
 	character_grid.columns = 3
@@ -140,9 +124,9 @@ func setup_character_grid():
 	character_grid.add_theme_constant_override("v_separation", 40)
 	character_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	
-	# Add it to the main container after the title
+	# Add it to the main container after the shared preview
 	main_container.add_child(character_grid)
-	main_container.move_child(character_grid, 1)  # Move it after the title
+	main_container.move_child(character_grid, 2)  # Move it after the title and shared preview
 	
 	# Find existing buttons and move them to a proper bottom container
 	var existing_back_button = get_node_or_null("MainContainer_BottomContainer#BackButton")
@@ -203,6 +187,74 @@ func setup_character_grid():
 	# Create the character cards
 	create_character_cards()
 
+func setup_shared_character_preview(main_container: Control):
+	# Create a container for the shared preview area
+	var preview_container = Control.new()
+	preview_container.name = "SharedPreviewContainer"
+	preview_container.custom_minimum_size = Vector2(800, 300)  # Larger area for character preview
+	preview_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	preview_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	
+	# Add background panel
+	var background_panel = Panel.new()
+	background_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background_panel.add_theme_stylebox_override("panel", create_preview_stylebox())
+	preview_container.add_child(background_panel)
+	
+	# Create SubViewport for shared character preview
+	shared_viewport = SubViewport.new()
+	shared_viewport.name = "SharedCharacterViewport"
+	shared_viewport.size = Vector2i(800, 300)
+	shared_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	shared_viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
+	shared_viewport.transparent_bg = true
+	
+	# Create camera for the viewport
+	shared_camera = Camera2D.new()
+	shared_camera.position = Vector2(400, 150)  # Center of viewport
+	shared_viewport.add_child(shared_camera)
+	
+	# Create shared ground
+	shared_ground = StaticBody2D.new()
+	shared_ground.name = "SharedGround"
+	
+	# Create collision shape for the ground
+	var collision_shape = CollisionShape2D.new()
+	var shape = RectangleShape2D.new()
+	shape.size = Vector2(800, 20)  # Full width of viewport
+	collision_shape.shape = shape
+	collision_shape.position = Vector2(400, 290)  # Position at bottom of viewport
+	shared_ground.add_child(collision_shape)
+	
+	# Create visual representation of the ground
+	var ground_sprite = ColorRect.new()
+	ground_sprite.color = Color(0.4, 0.4, 0.5, 1.0)
+	ground_sprite.size = Vector2(800, 20)
+	ground_sprite.position = Vector2(0, 280)  # Position at bottom
+	shared_ground.add_child(ground_sprite)
+	
+	# Add a subtle top border
+	var ground_border = ColorRect.new()
+	ground_border.color = Color(0.6, 0.6, 0.7, 1.0)
+	ground_border.size = Vector2(800, 2)
+	ground_border.position = Vector2(0, 280)
+	shared_ground.add_child(ground_border)
+	
+	shared_viewport.add_child(shared_ground)
+	
+	# Create TextureRect to display the viewport
+	var texture_rect = TextureRect.new()
+	texture_rect.texture = shared_viewport.get_texture()
+	texture_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	
+	preview_container.add_child(shared_viewport)
+	preview_container.add_child(texture_rect)
+	
+	# Add to main container after title
+	main_container.add_child(preview_container)
+	main_container.move_child(preview_container, 1)  # After title, before character grid
+
 func create_character_cards():
 	# Check if character_grid exists
 	if not character_grid:
@@ -224,154 +276,59 @@ func create_character_cards():
 
 func create_character_card(character_data: Dictionary, index: int) -> Control:
 	var card = VBoxContainer.new()
-	card.custom_minimum_size = Vector2(220, 280)
+	card.custom_minimum_size = Vector2(180, 200)  # Smaller cards for portraits
 	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	card.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	
 	# Add some spacing and padding
-	card.add_theme_constant_override("separation", 15)
+	card.add_theme_constant_override("separation", 10)
 	
 	# Add margin container for padding
 	var margin_container = MarginContainer.new()
-	margin_container.add_theme_constant_override("margin_left", 10)
-	margin_container.add_theme_constant_override("margin_right", 10)
-	margin_container.add_theme_constant_override("margin_top", 10)
-	margin_container.add_theme_constant_override("margin_bottom", 10)
+	margin_container.add_theme_constant_override("margin_left", 8)
+	margin_container.add_theme_constant_override("margin_right", 8)
+	margin_container.add_theme_constant_override("margin_top", 8)
+	margin_container.add_theme_constant_override("margin_bottom", 8)
 	card.add_child(margin_container)
 	
-	# Character preview container
-	var preview_container = Control.new()
-	preview_container.name = "PreviewContainer_" + character_data["name"].replace(" ", "_")
-	preview_container.custom_minimum_size = Vector2(200, 240)  # Reduced height to better align with button
-	preview_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	preview_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Portrait container
+	var portrait_container = Control.new()
+	portrait_container.name = "PortraitContainer_" + character_data["name"].replace(" ", "_")
+	portrait_container.custom_minimum_size = Vector2(160, 120)  # Square-ish portrait area
+	portrait_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	portrait_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	
-	# Add a background panel as a child
+	# Add a background panel for the portrait
 	var background_panel = Panel.new()
 	background_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	background_panel.add_theme_stylebox_override("panel", create_card_stylebox())
-	preview_container.add_child(background_panel)
+	background_panel.add_theme_stylebox_override("panel", create_portrait_stylebox())
+	portrait_container.add_child(background_panel)
 	
-	# SubViewport for character preview
-	var viewport = SubViewport.new()
-	viewport.name = "Viewport_" + character_data["name"].replace(" ", "_")
-	viewport.size = Vector2i(200, 350)  # Match container size
-	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE  # Only update when visible
-	viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS  # Always clear
-	viewport.transparent_bg = true  # Enable transparent background
+	# Create a simple portrait using a colored rectangle with character initial
+	var portrait = ColorRect.new()
+	portrait.color = get_character_portrait_color(character_data["name"])
+	portrait.size = Vector2(140, 100)
+	portrait.position = Vector2(10, 10)
+	portrait_container.add_child(portrait)
 	
-	# Camera for the viewport
-	var camera = Camera2D.new()
-	camera.position = Vector2(100, 60)  # Center camera to match character position
-	viewport.add_child(camera)
+	# Add character initial/icon
+	var initial_label = Label.new()
+	initial_label.text = get_character_initial(character_data["name"])
+	initial_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	initial_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	initial_label.add_theme_font_size_override("font_size", 36)
+	initial_label.add_theme_color_override("font_color", Color.WHITE)
+	initial_label.size = Vector2(140, 100)
+	initial_label.position = Vector2(10, 10)
+	portrait_container.add_child(initial_label)
 	
-	# No ground needed since we're disabling physics for preview
-	
-	# Character instance - use the actual player scene
-	var character_instance = character_data["preview_scene"].instantiate()
-	character_instance.position = Vector2(100, 60)  # Center in viewport (viewport is 200x120)
-	
-	# Debug: Print character node structure
-	print("Character instance created for ", character_data["name"])
-	print("  Character children count: ", character_instance.get_child_count())
-	for i in range(character_instance.get_child_count()):
-		var child = character_instance.get_child(i)
-		print("  Child ", i, ": ", child.name, " (", child.get_class(), ")")
-	
-	# Completely disable physics for preview
-	character_instance.motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	character_instance.velocity = Vector2.ZERO
-	character_instance.gravity = 0
-	
-	# Disable all physics processing
-	character_instance.set_physics_process(false)
-	character_instance.set_process(false)
-	
-	# Disable collision detection for preview
-	if character_instance.has_method("set_collision_layer_value"):
-		character_instance.set_collision_layer_value(1, false)
-	if character_instance.has_method("set_collision_mask_value"):
-		character_instance.set_collision_mask_value(1, false)
-	
-	# Override the run_speed to prevent movement
-	if "run_speed" in character_instance:
-		character_instance.run_speed = 0.0
-	
-	# No need for velocity reset timer since physics are disabled
-	
-	# Ensure the character's AnimatedSprite2D is visible and playing idle
-	var animated_sprite = character_instance.get_node_or_null("AnimatedSprite2D")
-	if animated_sprite:		
-		# Make sure the sprite is visible and properly connected
-		animated_sprite.visible = true
-		animated_sprite.modulate = Color.WHITE
-		animated_sprite.play("run")
-	else:
-		print("WARNING: AnimatedSprite2D not found for ", character_data["name"])
-	
-	# Add to viewport
-	viewport.add_child(character_instance)
-	
-	# Check if the character instance is properly connected
-	var character_parent = character_instance.get_parent()
-	print("Character instance parent for ", character_data["name"], ": ", character_parent.name if character_parent else "NULL")
-	
-	# If the character is orphaned, re-add it to the viewport
-	if not character_parent or character_parent != viewport:
-		print("Fixing orphaned character instance for ", character_data["name"])
-		if character_parent:
-			character_parent.remove_child(character_instance)
-		viewport.add_child(character_instance)
-	
-	# Ensure the character is visible and properly connected
-	character_instance.visible = true
-	character_instance.modulate = Color.WHITE
-	
-	print("Added character to viewport: ", character_data["name"], " - Viewport children: ", viewport.get_child_count())
-	
-	# Verify the final connection
-	var final_character_parent = character_instance.get_parent()
-	print("Final character instance parent for ", character_data["name"], ": ", final_character_parent.name if final_character_parent else "NULL")
-	
-	# Create TextureRect to display the viewport
-	var texture_rect = TextureRect.new()
-	texture_rect.texture = viewport.get_texture()
-	texture_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	
-	# Add viewport to preview container
-	preview_container.add_child(viewport)
-	preview_container.add_child(texture_rect)
-	
-	# Check viewport parent connection
-	var viewport_parent = viewport.get_parent()
-	print("Viewport parent for ", character_data["name"], ": ", viewport_parent.name if viewport_parent else "NULL")
-	
-	# Ensure preview container is visible and properly sized
-	preview_container.visible = true
-	preview_container.modulate = Color.WHITE
-	
-	margin_container.add_child(preview_container)
-	
-	# Debug preview container info
-	print("Preview container for ", character_data["name"], ":")
-	print("  Name: ", preview_container.name)
-	print("  Visible: ", preview_container.visible)
-	print("  Size: ", preview_container.size)
-	print("  Custom min size: ", preview_container.custom_minimum_size)
-	
-	# Force size update
-	preview_container.size = Vector2(200, 120)
-	print("  Forced size to: ", preview_container.size)
-	
-	# Defer size update to ensure proper layout
-	preview_container.call_deferred("set_size", Vector2(200, 120))
+	margin_container.add_child(portrait_container)
 	
 	# Character name
 	var name_label = Label.new()
 	name_label.text = character_data["name"]
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.add_theme_font_size_override("font_size", 18)
+	name_label.add_theme_font_size_override("font_size", 14)
 	name_label.add_theme_color_override("font_color", Color(0.9, 0.9, 1.0))
 	margin_container.add_child(name_label)
 	
@@ -380,7 +337,7 @@ func create_character_card(character_data: Dictionary, index: int) -> Control:
 	desc_label.text = character_data["description"]
 	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.add_theme_font_size_override("font_size", 12)
+	desc_label.add_theme_font_size_override("font_size", 10)
 	desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
 	margin_container.add_child(desc_label)
 	
@@ -388,16 +345,16 @@ func create_character_card(character_data: Dictionary, index: int) -> Control:
 	var select_button = Button.new()
 	select_button.text = "Select"
 	select_button.size = Vector2(100, 15)
-	select_button.custom_minimum_size = Vector2(200, 20)  # Half the default button height
+	select_button.position = Vector2(0, 100)
+	select_button.custom_minimum_size = Vector2(160, 25)  # Smaller button
 	select_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	select_button.add_theme_font_size_override("font_size", 12)  # Smaller font to fit
+	select_button.add_theme_font_size_override("font_size", 12)
 	margin_container.add_child(select_button)
 	
 	# Connect signals
 	select_button.pressed.connect(_on_character_selected.bind(character_data["scene_path"]))
 	
 	# Store references for hover handling
-	card.set_meta("character_instance", character_instance)
 	card.set_meta("character_data", character_data)
 	card.set_meta("index", index)
 	card.set_meta("is_selected", false)
@@ -407,6 +364,43 @@ func create_character_card(character_data: Dictionary, index: int) -> Control:
 	card.mouse_exited.connect(_on_card_hover_exited.bind(card))
 	
 	return card
+
+func get_character_portrait_color(character_name: String) -> Color:
+	match character_name:
+		"Tung tung tung Sahur":
+			return Color(0.8, 0.4, 0.2, 1.0)  # Orange-brown
+		"Tralalero Tralala":
+			return Color(0.2, 0.6, 0.8, 1.0)  # Blue
+		"Cappucino Assasino":
+			return Color(0.6, 0.3, 0.1, 1.0)  # Brown
+		_:
+			return Color(0.5, 0.5, 0.5, 1.0)  # Default gray
+
+func get_character_initial(character_name: String) -> String:
+	match character_name:
+		"Tung tung tung Sahur":
+			return "T"
+		"Tralalero Tralala":
+			return "T"
+		"Cappucino Assasino":
+			return "C"
+		_:
+			return "?"
+
+func create_portrait_stylebox() -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.2, 0.2, 0.3, 0.9)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.5, 0.5, 0.7, 1.0)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	
+	return style
 
 func create_card_stylebox() -> StyleBoxFlat:
 	var style = StyleBoxFlat.new()
@@ -428,6 +422,26 @@ func create_card_stylebox() -> StyleBoxFlat:
 	
 	return style
 
+func create_preview_stylebox() -> StyleBoxFlat:
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.2, 0.95)
+	style.border_width_left = 4
+	style.border_width_right = 4
+	style.border_width_top = 4
+	style.border_width_bottom = 4
+	style.border_color = Color(0.5, 0.5, 0.9, 1.0)
+	style.corner_radius_top_left = 15
+	style.corner_radius_top_right = 15
+	style.corner_radius_bottom_left = 15
+	style.corner_radius_bottom_right = 15
+	
+	# Add a subtle shadow effect
+	style.shadow_color = Color(0, 0, 0, 0.4)
+	style.shadow_size = 12
+	style.shadow_offset = Vector2(3, 3)
+	
+	return style
+
 func setup_buttons():
 	if next_button:
 		next_button.pressed.connect(_on_next_pressed)
@@ -438,7 +452,7 @@ func setup_buttons():
 func _on_character_selected(character_path: String):
 	selected_character_path = character_path
 	update_next_button_state()
-	update_character_animations()
+	update_shared_character_preview()
 	
 	# Visual feedback - highlight selected card
 	for i in range(character_cards.size()):
@@ -448,122 +462,99 @@ func _on_character_selected(character_path: String):
 		
 		# Update card appearance
 		var margin_container = card.get_child(0)  # Margin container
-		var panel = margin_container.get_child(0)  # Preview container
+		var portrait_container = margin_container.get_child(0)  # Portrait container
+		var panel = portrait_container.get_child(0)  # Background panel
 		var style = panel.get_theme_stylebox("panel")
 		if is_selected:
 			style.border_color = Color(0.8, 0.8, 1.0, 1.0)
 			style.bg_color = Color(0.3, 0.3, 0.5, 0.95)
-			style.shadow_color = Color(0.8, 0.8, 1.0, 0.4)
 		else:
-			style.border_color = Color(0.4, 0.4, 0.8, 1.0)
-			style.bg_color = Color(0.15, 0.15, 0.25, 0.9)
-			style.shadow_color = Color(0, 0, 0, 0.3)
+			style.border_color = Color(0.5, 0.5, 0.7, 1.0)
+			style.bg_color = Color(0.2, 0.2, 0.3, 0.9)
 
-func update_character_animations():
-	# Update animations for all characters based on selection
-	for i in range(character_cards.size()):
-		var card = character_cards[i]
-		var character_instance = card.get_meta("character_instance")
-		var is_selected = characters[i]["scene_path"] == selected_character_path
-		
-		if character_instance and character_instance.has_node("AnimatedSprite2D"):
-			var animated_sprite = character_instance.get_node("AnimatedSprite2D")
-			
-			if is_selected:
-				# Start random animation cycle for selected character
-				start_random_animation_cycle(character_instance)
-			else:
-				# Stop animations and return to idle for non-selected characters
-				stop_animation_cycle(character_instance)
-				animated_sprite.play("idle")
+func update_shared_character_preview():
+	# Remove existing character instance if any
+	if shared_character_instance:
+		shared_character_instance.queue_free()
+		shared_character_instance = null
+	
+	# Find the selected character data
+	var selected_character_data = null
+	for character_data in characters:
+		if character_data["scene_path"] == selected_character_path:
+			selected_character_data = character_data
+			break
+	
+	if not selected_character_data or not shared_viewport:
+		return
+	
+	# Create new character instance
+	shared_character_instance = selected_character_data["preview_scene"].instantiate()
+	shared_character_instance.position = Vector2(400, 270)  # Position on the ground
+	
+	# Setup physics for the character
+	shared_character_instance.motion_mode = CharacterBody2D.MOTION_MODE_GROUNDED
+	shared_character_instance.velocity = Vector2.ZERO
+	shared_character_instance.gravity = 500
+	
+	# Enable physics processing
+	shared_character_instance.set_physics_process(true)
+	shared_character_instance.set_process(false)
+	
+	# Setup collision detection
+	if shared_character_instance.has_method("set_collision_layer_value"):
+		shared_character_instance.set_collision_layer_value(1, false)
+	if shared_character_instance.has_method("set_collision_mask_value"):
+		shared_character_instance.set_collision_mask_value(1, true)
+	
+	# Override run_speed to prevent movement
+	if "run_speed" in shared_character_instance:
+		shared_character_instance.run_speed = 0.0  # No movement
+	
+	# Setup animated sprite
+	var animated_sprite = shared_character_instance.get_node_or_null("AnimatedSprite2D")
+	if animated_sprite:
+		animated_sprite.visible = true
+		animated_sprite.modulate = Color.WHITE
+		animated_sprite.play("run")
+	
+	# Add to shared viewport
+	shared_viewport.add_child(shared_character_instance)
+	
+	# Start running animation cycle
+	start_shared_character_animation()
+
+func start_shared_character_animation():
+	if not shared_character_instance:
+		return
+	
+	# Create a timer for character movement
+	var movement_timer = Timer.new()
+	shared_character_instance.add_child(movement_timer)
+	movement_timer.wait_time = 0.1  # Update movement frequently
+	movement_timer.one_shot = false
+	movement_timer.timeout.connect(_on_shared_character_movement_timeout)
+	movement_timer.start()
+	
+	# Store timer reference
+	shared_character_instance.set_meta("movement_timer", movement_timer)
+	
+	# Set initial movement direction
+	shared_character_instance.set_meta("moving_right", true)
+
+func _on_shared_character_movement_timeout():
+	# Character stays in place - no movement needed
+	pass
 
 func _on_card_hover_entered(card: Control):
 	hovered_card = card
-	# Only start animations on hover if this character is selected
-	var is_selected = card.get_meta("is_selected", false)
-	if is_selected:
-		var character_instance = card.get_meta("character_instance")
-		start_random_animation_cycle(character_instance)
+	# Visual feedback for hover - could add subtle effects here
 
 func _on_card_hover_exited(card: Control):
 	if hovered_card == card:
 		hovered_card = null
-		# Only stop animations if this character is not selected
-		var is_selected = card.get_meta("is_selected", false)
-		if not is_selected:
-			var character_instance = card.get_meta("character_instance")
-			stop_animation_cycle(character_instance)
 
-func start_random_animation_cycle(character_instance: Node):
-	if not character_instance or not character_instance.has_node("AnimatedSprite2D"):
-		return
-	
-	# Don't start a new timer if one already exists
-	if character_instance.has_meta("animation_timer"):
-		return
-	
-	# Create a timer for random animation changes
-	var animation_timer = Timer.new()
-	character_instance.add_child(animation_timer)
-	animation_timer.wait_time = 3.0  # Change animation every 3 seconds
-	animation_timer.one_shot = false
-	animation_timer.timeout.connect(_on_animation_timer_timeout.bind(character_instance))
-	animation_timer.start()
-	
-	# Store timer reference
-	character_instance.set_meta("animation_timer", animation_timer)
-	
-	# Start with a random animation
-	play_random_animation(character_instance)
 
-func stop_animation_cycle(character_instance: Node):
-	if not character_instance:
-		return
-	
-	# Stop and remove timer
-	var timer = character_instance.get_meta("animation_timer", null)
-	if timer:
-		timer.stop()
-		timer.queue_free()
-		character_instance.set_meta("animation_timer", null)
-	
-	# Return to idle animation
-	var animated_sprite = character_instance.get_node_or_null("AnimatedSprite2D")
-	if animated_sprite:
-		animated_sprite.play("idle")
-
-func _on_animation_timer_timeout(character_instance: Node):
-	play_random_animation(character_instance)
-
-func play_random_animation(character_instance: Node):
-	if not character_instance:
-		return
-	
-	# Get the animated sprite directly
-	var animated_sprite = character_instance.get_node_or_null("AnimatedSprite2D")
-	if not animated_sprite:
-		return
-	
-	# Get available animations from the sprite frames
-	var sprite_frames = animated_sprite.sprite_frames
-	if not sprite_frames:
-		return
-	
-	var available_animations = sprite_frames.get_animation_names()
-	
-	# Filter to only include appropriate preview animations
-	var preview_animations = []
-	for anim_name in available_animations:
-		if anim_name in ["idle", "run", "shoot", "jump", "crouch", "idle_gun", "run_gun", "jump_gun", "crouch_gun"]:
-			preview_animations.append(anim_name)
-	
-	# If no preview animations found, use all available
-	if preview_animations.is_empty():
-		preview_animations = available_animations
-	
-	# Play a random animation
-	var random_animation = preview_animations[randi() % preview_animations.size()]
-	animated_sprite.play(random_animation)
 
 func update_next_button_state():
 	if next_button:

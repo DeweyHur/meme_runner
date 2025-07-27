@@ -1,8 +1,9 @@
-[gd_scene load_steps=100 format=3 uid="uid://hqfnafaag1yy"]
+[gd_scene load_steps=104 format=3 uid="uid://hqfnafaag1yy"]
 
 [ext_resource type="Script" uid="uid://cs074l22h6bmu" path="res://Player/player.gd" id="1_23j4b"]
 [ext_resource type="Texture2D" uid="uid://ybuj4p5pp2fi" path="res://Player/Assets/idle.png" id="1_hn53c"]
 [ext_resource type="Texture2D" uid="uid://wneyumpv2sf2" path="res://Player/Assets/climb.png" id="2_rqjai"]
+[ext_resource type="Texture2D" uid="uid://cbp6xhc86xbku" path="res://Player/Assets/tung_crouch.png" id="4_d1c80"]
 [ext_resource type="Texture2D" uid="uid://d3nkhtplko1qx" path="res://Player/Assets/fall_tung.png" id="6_apopc"]
 [ext_resource type="Texture2D" uid="uid://5ae37ytbaptl" path="res://Player/Assets/walk.png" id="8_5knix"]
 [ext_resource type="Texture2D" uid="uid://sxusrjksaoy7" path="res://Player/Assets/combined_sprite_e391d8e4-871c-4865-8a1c-8eeee4865a74.png" id="8_apopc"]
@@ -77,9 +78,21 @@ region = Rect2(284, 0, 71, 67)
 atlas = ExtResource("2_rqjai")
 region = Rect2(355, 0, 71, 67)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_x3vf3"]
-atlas = ExtResource("6_apopc")
-region = Rect2(1536, 1920, 768, 384)
+[sub_resource type="AtlasTexture" id="AtlasTexture_d1c80"]
+atlas = ExtResource("4_d1c80")
+region = Rect2(0, 0, 675, 315)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ejfg"]
+atlas = ExtResource("4_d1c80")
+region = Rect2(675, 0, 675, 315)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e64vg"]
+atlas = ExtResource("4_d1c80")
+region = Rect2(1350, 0, 675, 315)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u37br"]
+atlas = ExtResource("4_d1c80")
+region = Rect2(2025, 0, 675, 315)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d30e8"]
 atlas = ExtResource("6_apopc")
@@ -430,11 +443,20 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_x3vf3")
+"texture": SubResource("AtlasTexture_d1c80")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ejfg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e64vg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u37br")
 }],
 "loop": true,
 "name": &"crouch",
-"speed": 5.0
+"speed": 30.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -698,7 +720,7 @@ script = ExtResource("1_23j4b")
 position = Vector2(0, -65)
 scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_si5oi")
-animation = &"fall"
+animation = &"crouch"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

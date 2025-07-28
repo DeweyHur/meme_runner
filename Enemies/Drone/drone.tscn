@@ -62,7 +62,7 @@ _data = {
 &"drone": SubResource("Animation_l2v0t")
 }
 
-[node name="Drone" type="Area2D"]
+[node name="Drone" type="RigidBody2D"]
 scale = Vector2(4, 4)
 collision_layer = 2
 script = ExtResource("1_pxc43")
@@ -72,6 +72,13 @@ texture = ExtResource("1_dfg34")
 hframes = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="AreaCollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

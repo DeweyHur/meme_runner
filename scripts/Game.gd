@@ -31,6 +31,8 @@ var boss_spawned = false
 var boss_active = false
 var boss_alarm_shown = false
 var boss: Node2D = null
+var boss_alarm_timer = 0.0
+var boss_alarm_duration = 3.0  # Show alarm for 3 seconds before spawning boss
 
 @onready var player = $Player
 var selected_character_path: String = "res://Player/tung.tscn"  # Default character
@@ -139,8 +141,15 @@ func _process(delta):
 		var current_stage_instance = stage_manager.get_current_stage()
 		if current_stage_instance and current_stage_instance.has_method("get_boss_spawn_position"):
 			var boss_spawn_pos = current_stage_instance.get_boss_spawn_position()
-			if player.position.x >= boss_spawn_pos.x - 400:  # Spawn boss when player gets close
-				spawn_boss()
+			if player.position.x >= boss_spawn_pos.x - 400:  # Show alarm when player gets close
+				if not boss_alarm_shown:
+					show_boss_alarm()
+				elif boss_alarm_timer >= boss_alarm_duration:
+					spawn_boss()
+	
+	# Update boss alarm timer
+	if boss_alarm_shown and not boss_spawned:
+		boss_alarm_timer += delta
 
 func _on_obstacle_timer_timeout():
 	# spawn_obstacle()
@@ -336,6 +345,15 @@ func get_ground_height_from_procedural_ground(x_position: float) -> float:
 
 # Boss alarm is now handled by individual stages
 
+func show_boss_alarm():
+	if boss_alarm_shown or not boss_alarm:
+		return
+	
+	boss_alarm_shown = true
+	boss_alarm_timer = 0.0
+	boss_alarm.show_boss_alarm()
+	print("Boss alarm triggered!")
+
 func spawn_boss():
 	if boss_spawned or not stage_manager:
 		return
@@ -346,6 +364,10 @@ func spawn_boss():
 	
 	print("Spawning boss for stage: ", stage_manager.get_current_stage_data().get("name", "Unknown"))
 	boss_spawned = true
+	
+	# Hide boss alarm
+	if boss_alarm:
+		boss_alarm.hide_boss_alarm()
 	
 	# Use the stage's spawn_boss method
 	var boss = current_stage_instance.spawn_boss()
@@ -450,9 +472,14 @@ func _on_stage_completed():
 		boss_spawned = false
 		boss_active = false
 		boss_alarm_shown = false
+		boss_alarm_timer = 0.0
 		if boss:
 			boss.queue_free()
 			boss = null
+		
+		# Hide boss alarm
+		if boss_alarm:
+			boss_alarm.hide_boss_alarm()
 		
 		# Hide boss HP bar
 		if boss_hp_bar:

@@ -11,6 +11,12 @@ func _ready():
 	# Call parent _ready() to initialize base stage
 	super._ready()
 
+# Override boss spawn position to place boss above ground
+func get_boss_spawn_position() -> Vector2:
+	var base_spawn_pos = super.get_boss_spawn_position()
+	# Place boss 200 pixels above ground level (around Y=300)
+	return Vector2(base_spawn_pos.x, 300)
+
 func setup_stage():
 	# Set up cyberpunk-themed obstacles
 	setup_cyberpunk_obstacles()

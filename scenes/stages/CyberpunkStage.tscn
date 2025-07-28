@@ -21,6 +21,6 @@ background_music = ExtResource("3_cyberpunk")
 [node name="Props" type="Node2D" parent="."]
 
 [node name="BossSpawnPoint" type="Marker2D" parent="."]
-position = Vector2(5000, 0)
+position = Vector2(3000, 0)
 
 [node name="StageInfo" type="Node" parent="."]

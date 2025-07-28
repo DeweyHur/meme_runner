@@ -76,8 +76,11 @@ func _input(event):
 			_on_continue_pressed()
 
 func show_game_completion():
-	stage_label.text = "GAME COMPLETED!"
-	progress_label.text = "Congratulations!\nYou've completed all stages!\n\nPress SPACE to return to Main Menu"
-	continue_button.visible = false
+	if stage_label:
+		stage_label.text = "GAME COMPLETED!"
+	if progress_label:
+		progress_label.text = "Congratulations!\nYou've completed all stages!\n\nPress SPACE to return to Main Menu"
+	if continue_button:
+		continue_button.visible = false
 	visible = true
 	set_process_input(true) 

@@ -1,4 +1,5 @@
 extends Node2D
+class_name Stage
 
 # Stage information
 @export var stage_name: String = "Unknown Stage"
@@ -69,23 +70,26 @@ func spawn_boss() -> Node2D:
 
 func complete_stage():
 	stage_completed = true
-	stage_completed.emit()
+	stage_completed_signal.emit()
 
 func is_stage_completed() -> bool:
 	return stage_completed
 
 func cleanup_stage():
 	# Clean up stage-specific elements
-	for child in obstacles.get_children():
-		if is_instance_valid(child):
-			child.queue_free()
+	if obstacles:
+		for child in obstacles.get_children():
+			if is_instance_valid(child):
+				child.queue_free()
 	
-	for child in enemies.get_children():
-		if is_instance_valid(child):
-			child.queue_free()
+	if enemies:
+		for child in enemies.get_children():
+			if is_instance_valid(child):
+				child.queue_free()
 	
-	for child in props.get_children():
-		if is_instance_valid(child):
-			child.queue_free()
+	if props:
+		for child in props.get_children():
+			if is_instance_valid(child):
+				child.queue_free()
 
-signal stage_completed 
+signal stage_completed_signal 

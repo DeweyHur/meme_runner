@@ -1,36 +1,15 @@
-extends Node2D
+extends Stage
+class_name CyberpunkStage
 
-# Stage information
-@export var stage_name: String = "Cyberpunk Stage"
-@export var stage_description: String = "A neon-lit cityscape with towering skyscrapers and flying cars"
-@export var stage_number: int = 2
-@export var boss_scene: PackedScene
-@export var background_music: AudioStream
-@export var difficulty_multiplier: float = 1.2
-
-# Stage-specific variables
-var boss_spawned: bool = false
-var boss_active: bool = false
-var stage_completed: bool = false
-
-# Stage elements
-var parallax_background: ParallaxBackground
-var ground: Node2D
-var obstacles: Node2D
-var enemies: Node2D
-var props: Node2D
-var boss_spawn_point: Marker2D
-
+# Override stage information for cyberpunk theme
 func _ready():
-	# Initialize node references
-	parallax_background = get_node_or_null("ParallaxBackground")
-	ground = get_node_or_null("Ground")
-	obstacles = get_node_or_null("Obstacles")
-	enemies = get_node_or_null("Enemies")
-	props = get_node_or_null("Props")
-	boss_spawn_point = get_node_or_null("BossSpawnPoint")
+	stage_name = "Cyberpunk Stage"
+	stage_description = "A neon-lit cityscape with towering skyscrapers and flying cars"
+	stage_number = 2
+	difficulty_multiplier = 1.2
 	
-	setup_stage()
+	# Call parent _ready() to initialize base stage
+	super._ready()
 
 func setup_stage():
 	# Set up cyberpunk-themed obstacles
@@ -38,8 +17,6 @@ func setup_stage():
 	
 	# Set up cyberpunk props
 	setup_cyberpunk_props()
-
-
 
 func setup_cyberpunk_obstacles():
 	# Create cyberpunk-themed obstacles like energy barriers and drones
@@ -64,70 +41,4 @@ func setup_cyberpunk_props():
 		hologram.color = Color(0.2, 0.8, 1.0, 0.6)  # Cyan hologram
 		hologram.size = Vector2(40, 60)
 		hologram.position = Vector2(i * 500 + randf() * 200, 420 - hologram.size.y)
-		props.add_child(hologram)
-
-# Stage interface methods
-func get_stage_name() -> String:
-	return stage_name
-
-func get_stage_description() -> String:
-	return stage_description
-
-func get_stage_number() -> int:
-	return stage_number
-
-func get_boss_scene() -> PackedScene:
-	return boss_scene
-
-func get_background_music() -> AudioStream:
-	return background_music
-
-func get_difficulty_multiplier() -> float:
-	return difficulty_multiplier
-
-func get_boss_spawn_position() -> Vector2:
-	if boss_spawn_point:
-		return boss_spawn_point.global_position
-	return Vector2(5000, 0)  # Default spawn position
-
-func spawn_boss() -> Node2D:
-	if boss_spawned or not boss_scene:
-		return null
-	
-	boss_spawned = true
-	var boss = boss_scene.instantiate()
-	boss.global_position = get_boss_spawn_position()
-	add_child(boss)
-	
-	# Activate boss if it has the activate_boss method
-	if boss.has_method("activate_boss"):
-		boss.activate_boss()
-		boss_active = true
-	
-	return boss
-
-func complete_stage():
-	stage_completed = true
-	stage_completed_signal.emit()
-
-func is_stage_completed() -> bool:
-	return stage_completed
-
-func cleanup_stage():
-	# Clean up stage-specific elements
-	if obstacles:
-		for child in obstacles.get_children():
-			if is_instance_valid(child):
-				child.queue_free()
-	
-	if enemies:
-		for child in enemies.get_children():
-			if is_instance_valid(child):
-				child.queue_free()
-	
-	if props:
-		for child in props.get_children():
-			if is_instance_valid(child):
-				child.queue_free()
-
-signal stage_completed_signal 
+		props.add_child(hologram) 

@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://volcano_stage"]
+
+[ext_resource type="Script" path="res://scripts/stages/VolcanoStage.gd" id="1_volcano"]
+[ext_resource type="PackedScene" path="res://Enemies/Drone/drone.tscn" id="2_volcano"]
+[ext_resource type="AudioStream" path="res://Music/Tung Tung Tung Sahur.mp3" id="3_volcano"]
+
+[node name="VolcanoStage" type="Node2D"]
+script = ExtResource("1_volcano")
+stage_name = "Volcano Stage"
+stage_description = "A treacherous volcanic landscape with flowing lava and ash clouds"
+stage_number = 3
+boss_scene = ExtResource("2_volcano")
+background_music = ExtResource("3_volcano")
+difficulty_multiplier = 1.5
+
+[node name="ParallaxBackground" type="Node2D" parent="."]
+
+[node name="Ground" type="Node2D" parent="."]
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="BossSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(5000, 0)
+
+[node name="StageInfo" type="Node" parent="."] 

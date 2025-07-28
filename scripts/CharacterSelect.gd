@@ -33,7 +33,7 @@ var characters = [
 	{
 		"name": "Cappucino Assasino", 
 		"description": "Rich animations with gun variants\nFor experienced players",
-		"scene_path": "res://Player/trallo.tscn",
+		"scene_path": "res://Player/capuccino.tscn",
 		"preview_scene": preload("res://Player/capuccino.tscn")
 	},	
 ]
@@ -433,11 +433,11 @@ func get_character_portrait_color(character_name: String) -> Color:
 func get_character_initial(character_name: String) -> String:
 	match character_name:
 		"Tung tung tung Sahur":
-			return "T"
+			return "TS"
 		"Tralalero Tralala":
-			return "T"
+			return "TT"
 		"Cappucino Assasino":
-			return "C"
+			return "CA"
 		_:
 			return "?"
 

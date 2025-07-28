@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://stage_base"]
+
+[ext_resource type="Script" path="res://scripts/Stage.gd" id="1_stage"]
+
+[node name="Stage" type="Node2D"]
+script = ExtResource("1_stage")
+
+[node name="ParallaxBackground" type="Node2D" parent="."]
+
+[node name="Ground" type="Node2D" parent="."]
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="BossSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(5000, 0)
+
+[node name="StageInfo" type="Node" parent="."] 

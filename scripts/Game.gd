@@ -27,6 +27,9 @@ var stage_start_distance = 0.0
 var stage_boss_distance = 5000.0  # Distance to spawn boss for each stage
 var stage_boss_alarm_distance = 4500.0  # Distance to show alarm before boss
 
+# Stage manager
+@onready var stage_manager: Node = $StageManager
+
 # Game state variables
 var is_game_over = false
 
@@ -74,6 +77,11 @@ func _ready():
 	timer.timeout.connect(_hide_instructions)
 	timer.start()
 	
+	# Initialize stage manager
+	if stage_manager:
+		stage_manager.stage_changed.connect(_on_stage_changed)
+		stage_manager.stage_completed.connect(_on_stage_completed)
+	
 	# Initialize stage popup
 	if stage_popup:
 		stage_popup.stage_completed.connect(_on_stage_completed)
@@ -113,8 +121,12 @@ func _process(delta):
 		score_label.text = "Score: " + str(score)
 		
 		# Update stage display
-		if stage_label:
-			stage_label.text = "Stage: " + str(current_stage)
+		if stage_label and stage_manager:
+			var stage_data = stage_manager.get_current_stage_data()
+			if stage_data.has("name"):
+				stage_label.text = "Stage: " + stage_data["name"]
+			else:
+				stage_label.text = "Stage: " + str(current_stage)
 		
 		# Increase game speed over time
 		game_speed = 1.0 + (score / 1000.0)
@@ -461,43 +473,59 @@ func player_took_damage():
 		print("Player life reached 0 from damage, calling game_over()")
 		game_over()
 
+func _on_stage_changed(stage_data: Dictionary):
+	# Update current stage info
+	current_stage = stage_manager.get_current_stage_number()
+	total_stages = stage_manager.get_total_stages()
+	
+	# Update stage label
+	if stage_label:
+		stage_label.text = "Stage: " + stage_data["name"]
+	
+	print("Stage changed to: ", stage_data["name"])
+
 func _on_stage_completed():
-	# Proceed to next stage
-	current_stage += 1
-	stage_start_distance = player.position.x
-	
-	# Reset player life to 100 for new stage
-	life = 100.0
-	life_timer = 0.0
-	update_life_display()
-	
-	# Reset boss state for new stage
-	boss_spawned = false
-	boss_active = false
-	boss_alarm_shown = false
-	if boss:
-		boss.queue_free()
-		boss = null
-	
-	# Hide boss HP bar
-	if boss_hp_bar:
-		boss_hp_bar.hide_hp_bar()
-	
-	# Clear existing enemies and obstacles
-	clear_stage_enemies()
-	
-	# Regenerate the procedural world for the new stage
-	if procedural_ground and procedural_ground.has_method("regenerate_world"):
-		procedural_ground.regenerate_world()
-	
-	# Respawn the character for the new stage
-	replace_player_with_selected_character()
-	
-	# Show stage popup for new stage
-	if stage_popup:
-		stage_popup.show_stage_popup(current_stage, false)
-	
-	print("Proceeding to stage %d with regenerated world and fresh character (life: 100)" % current_stage)
+	# Proceed to next stage using stage manager
+	if stage_manager and stage_manager.next_stage():
+		current_stage = stage_manager.get_current_stage_number()
+		stage_start_distance = player.position.x
+		
+		# Reset player life to 100 for new stage
+		life = 100.0
+		life_timer = 0.0
+		update_life_display()
+		
+		# Reset boss state for new stage
+		boss_spawned = false
+		boss_active = false
+		boss_alarm_shown = false
+		if boss:
+			boss.queue_free()
+			boss = null
+		
+		# Hide boss HP bar
+		if boss_hp_bar:
+			boss_hp_bar.hide_hp_bar()
+		
+		# Clear existing enemies and obstacles
+		clear_stage_enemies()
+		
+		# Regenerate the procedural world for the new stage
+		if procedural_ground and procedural_ground.has_method("regenerate_world"):
+			procedural_ground.regenerate_world()
+		
+		# Respawn the character for the new stage
+		replace_player_with_selected_character()
+		
+		# Show stage popup for new stage
+		if stage_popup:
+			stage_popup.show_stage_popup(current_stage, false)
+		
+		print("Proceeding to stage %d with regenerated world and fresh character (life: 100)" % current_stage)
+	else:
+		# No more stages - game completed
+		print("All stages completed!")
+		_on_game_completed()
 
 func clear_stage_enemies():
 	# Clear all turrets

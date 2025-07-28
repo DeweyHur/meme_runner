@@ -10,7 +10,7 @@ signal game_completed
 
 var current_stage = 1
 var total_stages = 3
-var stage_names = ["Stage 1: City Streets", "Stage 2: Industrial Zone", "Stage 3: Final Showdown"]
+var stage_names = ["Jungle Stage", "Cyberpunk Stage", "Volcano Stage"]
 var is_stage_completed = false
 
 func _ready():
@@ -46,11 +46,12 @@ func update_stage_display():
 	if progress_label:
 		if is_stage_completed:
 			if current_stage < total_stages:
-				progress_label.text = "Stage %d Complete!\nBoss Defeated!\n\nPress CONTINUE to proceed to Stage %d" % [current_stage, current_stage + 1]
+				var next_stage_name = stage_names[current_stage] if current_stage < stage_names.size() else "Stage " + str(current_stage + 1)
+				progress_label.text = "%s Complete!\nBoss Defeated!\n\nPress CONTINUE to proceed to %s" % [stage_names[current_stage - 1], next_stage_name]
 			else:
-				progress_label.text = "Stage %d Complete!\nBoss Defeated!\n\nCongratulations! You've completed all stages!" % current_stage
+				progress_label.text = "%s Complete!\nBoss Defeated!\n\nCongratulations! You've completed all stages!" % stage_names[current_stage - 1]
 		else:
-			progress_label.text = "Stage %d of %d\n\nDefeat the boss to proceed!" % [current_stage, total_stages]
+			progress_label.text = "%s (%d of %d)\n\nDefeat the boss to proceed!" % [stage_names[current_stage - 1], current_stage, total_stages]
 	
 	# Show/hide continue button based on completion
 	if continue_button:

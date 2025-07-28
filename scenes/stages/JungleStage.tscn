@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://jungle_stage"]
+
+[ext_resource type="Script" path="res://scripts/stages/JungleStage.gd" id="1_jungle"]
+[ext_resource type="PackedScene" path="res://Enemies/Drone/drone.tscn" id="2_jungle"]
+[ext_resource type="AudioStream" path="res://Music/cyber_runner.ogg" id="3_jungle"]
+
+[node name="JungleStage" type="Node2D"]
+script = ExtResource("1_jungle")
+stage_name = "Jungle Stage"
+stage_description = "A dense jungle filled with ancient ruins and dangerous wildlife"
+stage_number = 1
+boss_scene = ExtResource("2_jungle")
+background_music = ExtResource("3_jungle")
+difficulty_multiplier = 1.0
+
+[node name="ParallaxBackground" type="Node2D" parent="."]
+
+[node name="Ground" type="Node2D" parent="."]
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="BossSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(5000, 0)
+
+[node name="StageInfo" type="Node" parent="."] 

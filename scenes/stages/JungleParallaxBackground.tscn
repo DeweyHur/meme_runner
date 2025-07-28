@@ -44,6 +44,7 @@ motion_scale = Vector2(0.7, 0.5)
 motion_mirroring = Vector2(986, 0)
 
 [node name="TextureRect" type="TextureRect" parent="ParallaxLayerNearBuildings"]
+visible = false
 offset_top = 20.0
 offset_right = 986.0
 offset_bottom = 1006.0

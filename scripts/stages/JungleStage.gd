@@ -1,5 +1,8 @@
 extends Node2D
 
+static func test_function():
+	print("JungleStage script is loaded!")
+
 # Stage information
 @export var stage_name: String = "Jungle Stage"
 @export var stage_description: String = "A dense jungle filled with ancient ruins and dangerous wildlife"
@@ -14,7 +17,7 @@ var boss_active: bool = false
 var stage_completed: bool = false
 
 # Stage elements
-var parallax_background: Node2D
+var parallax_background: ParallaxBackground
 var ground: Node2D
 var obstacles: Node2D
 var enemies: Node2D
@@ -23,7 +26,7 @@ var boss_spawn_point: Marker2D
 
 func _ready():
 	# Initialize node references
-	parallax_background = get_node_or_null("ParallaxBackground")
+	parallax_background = get_node_or_null("JungleParallaxBackground")
 	ground = get_node_or_null("Ground")
 	obstacles = get_node_or_null("Obstacles")
 	enemies = get_node_or_null("Enemies")
@@ -33,33 +36,13 @@ func _ready():
 	setup_stage()
 
 func setup_stage():
-	# Set up jungle-specific background
-	setup_jungle_background()
-	
 	# Set up jungle-themed obstacles
 	setup_jungle_obstacles()
 	
 	# Set up jungle props
 	setup_jungle_props()
 
-func setup_jungle_background():
-	if not parallax_background:
-		return
-		
-	# Create a simple jungle background using colored rectangles
-	var background = ColorRect.new()
-	background.color = Color(0.1, 0.3, 0.1, 1.0)  # Dark green
-	background.size = Vector2(2000, 600)
-	background.position = Vector2(-1000, -300)
-	parallax_background.add_child(background)
-	
-	# Add some tree silhouettes
-	for i in range(10):
-		var tree = ColorRect.new()
-		tree.color = Color(0.05, 0.2, 0.05, 1.0)  # Darker green
-		tree.size = Vector2(50, 200 + randf() * 100)
-		tree.position = Vector2(i * 200 + randf() * 100, -tree.size.y + 100)
-		parallax_background.add_child(tree)
+
 
 func setup_jungle_obstacles():
 	# Create jungle-themed obstacles like fallen logs and vines

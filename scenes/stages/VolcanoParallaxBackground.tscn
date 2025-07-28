@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://volcano_parallax"]
+
+[ext_resource type="Texture2D" uid="uid://drl0rl0rl0rl0" path="res://World/background/skyline-a.png" id="1_volcano_bg"]
+[ext_resource type="Texture2D" uid="uid://esm1sm1sm1sm1" path="res://World/background/skyline-b.png" id="2_volcano_bg"]
+
+[node name="ParallaxBackground" type="ParallaxBackground"]
+
+[node name="ParallaxLayerSky" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.1, 0)
+motion_mirroring = Vector2(2000, 0)
+
+[node name="TextureRect" type="TextureRect" parent="ParallaxLayerSky"]
+offset_left = 0.0
+offset_top = -300.0
+offset_right = 1500.0
+offset_bottom = 1000.0
+texture = ExtResource("1_volcano_bg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="ParallaxLayerVolcano" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.4, 0.2)
+motion_mirroring = Vector2(1500, 0)
+
+[node name="TextureRect" type="TextureRect" parent="ParallaxLayerVolcano"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1500.0
+offset_bottom = 800.0
+texture = ExtResource("2_volcano_bg")
+expand_mode = 4
+stretch_mode = 4 

@@ -20,13 +20,6 @@ var turret_spawn_timer = 0.0
 var turret_spawn_interval = 5.0  # Spawn turret every 5 seconds
 var turret_spawn_distance = 600.0  # Distance ahead of player to spawn turrets
 
-# Stage system variables
-var current_stage = 1
-var total_stages = 3
-var stage_start_distance = 0.0
-var stage_boss_distance = 5000.0  # Distance to spawn boss for each stage
-var stage_boss_alarm_distance = 4500.0  # Distance to show alarm before boss
-
 # Stage manager
 @onready var stage_manager: Node = $StageManager
 
@@ -34,7 +27,6 @@ var stage_boss_alarm_distance = 4500.0  # Distance to show alarm before boss
 var is_game_over = false
 
 # Boss battle variables
-var boss_scene = preload("res://Enemies/Drone/drone.tscn")  # We'll modify this to use boss script
 var boss_spawned = false
 var boss_active = false
 var boss_alarm_shown = false
@@ -86,7 +78,7 @@ func _ready():
 	if stage_popup:
 		stage_popup.stage_completed.connect(_on_stage_completed)
 		stage_popup.game_completed.connect(_on_game_completed)
-		stage_popup.show_stage_popup(current_stage, false)
+		stage_popup.show_stage_popup(1, false)  # Start with stage 1
 		
 		# Hide stage popup after 3 seconds for initial stage
 		var stage_timer = Timer.new()
@@ -126,7 +118,7 @@ func _process(delta):
 			if stage_data.has("name"):
 				stage_label.text = "Stage: " + stage_data["name"]
 			else:
-				stage_label.text = "Stage: " + str(current_stage)
+				stage_label.text = "Stage: " + str(stage_manager.get_current_stage_number())
 		
 		# Increase game speed over time
 		game_speed = 1.0 + (score / 1000.0)
@@ -142,18 +134,13 @@ func _process(delta):
 		spawn_turret()
 		turret_spawn_timer = 0.0
 	
-	# Handle boss alarm and spawning for current stage
-	var current_boss_alarm_distance = stage_start_distance + stage_boss_alarm_distance
-	var current_boss_spawn_distance = stage_start_distance + stage_boss_distance
-	
-	if not boss_alarm_shown and player.position.x >= current_boss_alarm_distance:
-		show_boss_alarm()
-		boss_alarm_shown = true
-	
-	if not boss_spawned and player.position.x >= current_boss_spawn_distance:
-		print("Player reached %.0f x position, spawning boss for stage %d!" % [current_boss_spawn_distance, current_stage])
-		hide_boss_alarm()
-		spawn_boss()
+	# Handle boss spawning for current stage
+	if stage_manager and not boss_spawned and not boss_active:
+		var current_stage_instance = stage_manager.get_current_stage()
+		if current_stage_instance and current_stage_instance.has_method("get_boss_spawn_position"):
+			var boss_spawn_pos = current_stage_instance.get_boss_spawn_position()
+			if player.position.x >= boss_spawn_pos.x - 400:  # Spawn boss when player gets close
+				spawn_boss()
 
 func _on_obstacle_timer_timeout():
 	# spawn_obstacle()
@@ -258,7 +245,7 @@ func game_over():
 	# Show game over screen
 	var game_over_label = Label.new()
 	game_over_label.name = "GameOverLabel"
-	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nStage Reached: " + str(current_stage) + "\nPress SPACE to return to Main Menu"
+	game_over_label.text = "Game Over!\nFinal Score: " + str(score) + "\nStage Reached: " + str(stage_manager.get_current_stage_number() if stage_manager else 1) + "\nPress SPACE to return to Main Menu"
 	game_over_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	game_over_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	game_over_label.anchors_preset = Control.PRESET_FULL_RECT
@@ -270,7 +257,7 @@ func game_over():
 	# Listen for input to return to main menu
 	set_process_input(true)
 	
-	print("Game Over! Final Score: %d, Stage Reached: %d" % [score, current_stage])
+	print("Game Over! Final Score: %d, Stage Reached: %d" % [score, stage_manager.get_current_stage_number() if stage_manager else 1])
 
 func _input(event):
 	if event.is_action_pressed("ui_accept"):
@@ -347,60 +334,31 @@ func get_ground_height_from_procedural_ground(x_position: float) -> float:
 	# Fallback: use a default height
 	return 500.0
 
-func show_boss_alarm():
-	if boss_alarm:
-		boss_alarm.show_boss_alarm()
-		print("Boss alarm shown at x position: %.0f" % player.position.x)
-
-func hide_boss_alarm():
-	if boss_alarm:
-		boss_alarm.hide_boss_alarm()
+# Boss alarm is now handled by individual stages
 
 func spawn_boss():
-	if boss_spawned or not player:
+	if boss_spawned or not stage_manager:
 		return
 	
-	print("Spawning boss drone!")
+	var current_stage_instance = stage_manager.get_current_stage()
+	if not current_stage_instance or not current_stage_instance.has_method("spawn_boss"):
+		return
+	
+	print("Spawning boss for stage: ", stage_manager.get_current_stage_data().get("name", "Unknown"))
 	boss_spawned = true
 	
-	# Create boss drone
-	boss = boss_scene.instantiate()
-	add_child(boss)
-	
-	# Position boss at the correct distance from player
-	boss.global_position = Vector2(player.position.x + 400, player.position.y - 100)
-	print("Boss spawned at position: ", boss.global_position, " (player at: ", player.position, ")")
-	
-	# Replace the script with boss script
-	var boss_script = load("res://Enemies/Drone/boss_drone.gd")
-	if boss_script:
-		boss.set_script(boss_script)
-		boss.activate_boss()
+	# Use the stage's spawn_boss method
+	var boss = current_stage_instance.spawn_boss()
+	if boss:
 		boss_active = true
 		
 		# Show boss HP bar
 		if boss_hp_bar:
 			boss_hp_bar.set_boss(boss)
 		
-		print("Boss drone activated and ready for battle!")
+		print("Boss spawned successfully!")
 	else:
-		print("Failed to load boss script!")
-
-func boss_defeated():
-	print("Boss defeated for stage %d!" % current_stage)
-	boss_active = false
-	
-	# Hide boss HP bar
-	if boss_hp_bar:
-		boss_hp_bar.hide_hp_bar()
-	
-	# Show stage popup for completion
-	if stage_popup:
-		if current_stage < total_stages:
-			stage_popup.show_stage_popup(current_stage, true)
-		else:
-			# Final stage completed
-			stage_popup.show_game_completion()
+		print("Failed to spawn boss!")
 
 func show_victory_screen():
 	# Stop spawning enemies
@@ -474,10 +432,6 @@ func player_took_damage():
 		game_over()
 
 func _on_stage_changed(stage_data: Dictionary):
-	# Update current stage info
-	current_stage = stage_manager.get_current_stage_number()
-	total_stages = stage_manager.get_total_stages()
-	
 	# Update stage label
 	if stage_label:
 		stage_label.text = "Stage: " + stage_data["name"]
@@ -487,9 +441,6 @@ func _on_stage_changed(stage_data: Dictionary):
 func _on_stage_completed():
 	# Proceed to next stage using stage manager
 	if stage_manager and stage_manager.next_stage():
-		current_stage = stage_manager.get_current_stage_number()
-		stage_start_distance = player.position.x
-		
 		# Reset player life to 100 for new stage
 		life = 100.0
 		life_timer = 0.0
@@ -519,9 +470,9 @@ func _on_stage_completed():
 		
 		# Show stage popup for new stage
 		if stage_popup:
-			stage_popup.show_stage_popup(current_stage, false)
+			stage_popup.show_stage_popup(stage_manager.get_current_stage_number(), false)
 		
-		print("Proceeding to stage %d with regenerated world and fresh character (life: 100)" % current_stage)
+		print("Proceeding to stage %d with regenerated world and fresh character (life: 100)" % stage_manager.get_current_stage_number())
 	else:
 		# No more stages - game completed
 		print("All stages completed!")

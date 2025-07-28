@@ -14,7 +14,7 @@ var boss_active: bool = false
 var stage_completed: bool = false
 
 # Stage elements
-var parallax_background: Node2D
+var parallax_background: ParallaxBackground
 var ground: Node2D
 var obstacles: Node2D
 var enemies: Node2D
@@ -33,52 +33,13 @@ func _ready():
 	setup_stage()
 
 func setup_stage():
-	# Set up volcano-specific background
-	setup_volcano_background()
-	
 	# Set up volcano-themed obstacles
 	setup_volcano_obstacles()
 	
 	# Set up volcano props
 	setup_volcano_props()
 
-func setup_volcano_background():
-	if not parallax_background:
-		return
-		
-	# Create a volcanic landscape background
-	var background = ColorRect.new()
-	background.color = Color(0.2, 0.1, 0.05, 1.0)  # Dark brown
-	background.size = Vector2(2000, 600)
-	background.position = Vector2(-1000, -300)
-	parallax_background.add_child(background)
-	
-	# Add volcano mountains
-	for i in range(5):
-		var mountain = ColorRect.new()
-		mountain.color = Color(0.3, 0.15, 0.1, 1.0)  # Brown
-		mountain.size = Vector2(150 + randf() * 100, 400 + randf() * 200)
-		mountain.position = Vector2(i * 400 + randf() * 100, -mountain.size.y + 100)
-		parallax_background.add_child(mountain)
-		
-		# Add lava glow to some mountains
-		if randf() > 0.5:
-			var lava_glow = ColorRect.new()
-			lava_glow.color = Color(1.0, 0.3, 0.0, 0.6)  # Orange lava glow
-			lava_glow.size = Vector2(30, 50)
-			lava_glow.position = Vector2(
-				mountain.position.x + mountain.size.x / 2 - 15,
-				mountain.position.y + mountain.size.y - 100
-			)
-			parallax_background.add_child(lava_glow)
-	
-	# Add ash clouds
-	for i in range(8):
-		var cloud = ColorRect.new()
-		cloud.color = Color(0.4, 0.4, 0.4, 0.7)  # Gray ash
-		cloud.size = Vector2(80 + randf() * 60, 40 + randf() * 30)
-		cloud.position = Vector2(i * 250 + randf() * 100, -100 + randf() * 50)
-		parallax_background.add_child(cloud)
+
 
 func setup_volcano_obstacles():
 	# Create volcano-themed obstacles like lava pools and falling rocks

@@ -14,7 +14,7 @@ var boss_active: bool = false
 var stage_completed: bool = false
 
 # Stage elements
-var parallax_background: Node2D
+var parallax_background: ParallaxBackground
 var ground: Node2D
 var obstacles: Node2D
 var enemies: Node2D
@@ -33,44 +33,13 @@ func _ready():
 	setup_stage()
 
 func setup_stage():
-	# Set up cyberpunk-specific background
-	setup_cyberpunk_background()
-	
 	# Set up cyberpunk-themed obstacles
 	setup_cyberpunk_obstacles()
 	
 	# Set up cyberpunk props
 	setup_cyberpunk_props()
 
-func setup_cyberpunk_background():
-	if not parallax_background:
-		return
-		
-	# Create a cyberpunk city background
-	var background = ColorRect.new()
-	background.color = Color(0.05, 0.05, 0.1, 1.0)  # Dark blue-black
-	background.size = Vector2(2000, 600)
-	background.position = Vector2(-1000, -300)
-	parallax_background.add_child(background)
-	
-	# Add skyscrapers
-	for i in range(8):
-		var building = ColorRect.new()
-		building.color = Color(0.1, 0.1, 0.2, 1.0)  # Dark blue
-		building.size = Vector2(80 + randf() * 40, 300 + randf() * 200)
-		building.position = Vector2(i * 250 + randf() * 50, -building.size.y + 100)
-		parallax_background.add_child(building)
-		
-		# Add neon lights to buildings
-		for j in range(3):
-			var neon = ColorRect.new()
-			neon.color = Color(randf(), randf(), 1.0, 0.8)  # Random neon colors
-			neon.size = Vector2(10, 20)
-			neon.position = Vector2(
-				building.position.x + randf() * building.size.x,
-				building.position.y + j * 100 + randf() * 50
-			)
-			parallax_background.add_child(neon)
+
 
 func setup_cyberpunk_obstacles():
 	# Create cyberpunk-themed obstacles like energy barriers and drones

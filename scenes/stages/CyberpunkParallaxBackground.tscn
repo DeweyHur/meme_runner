@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://cyberpunk_parallax"]
+
+[ext_resource type="Texture2D" uid="uid://bqj8qj8qj8qj8" path="res://World/background/buildings-bg.png" id="1_cyberpunk_bg"]
+[ext_resource type="Texture2D" uid="uid://cqk9qk9qk9qk9" path="res://World/background/near-buildings-bg.png" id="2_cyberpunk_bg"]
+
+[node name="ParallaxBackground" type="ParallaxBackground"]
+
+[node name="ParallaxLayerSky" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.2, 0)
+motion_mirroring = Vector2(2000, 0)
+
+[node name="TextureRect" type="TextureRect" parent="ParallaxLayerSky"]
+offset_left = 0.0
+offset_top = -200.0
+offset_right = 1200.0
+offset_bottom = 800.0
+texture = ExtResource("1_cyberpunk_bg")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="ParallaxLayerNearBuildings" type="ParallaxLayer" parent="."]
+motion_scale = Vector2(0.6, 0.3)
+motion_mirroring = Vector2(1200, 0)
+
+[node name="TextureRect" type="TextureRect" parent="ParallaxLayerNearBuildings"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1200.0
+offset_bottom = 600.0
+texture = ExtResource("2_cyberpunk_bg")
+expand_mode = 4
+stretch_mode = 4 

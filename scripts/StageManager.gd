@@ -58,14 +58,24 @@ func load_stage(stage_index: int):
 	
 	# Load new stage
 	var stage_data = stages[stage_index]
+	print("Loading stage scene from: ", stage_data["scene_path"])
 	var stage_scene = load(stage_data["scene_path"])
 	
 	if stage_scene:
+		print("Stage scene loaded successfully")
 		current_stage_instance = stage_scene.instantiate()
+		print("Stage instance created: ", current_stage_instance.name)
+		print("Stage instance valid: ", current_stage_instance != null)
+		print("Stage instance type: ", current_stage_instance.get_class())
+		print("Stage instance script: ", current_stage_instance.get_script())
+		
+		# Test if script is loaded
+		if current_stage_instance.has_method("test_function"):
+			current_stage_instance.test_function()
 		current_stage_index = stage_index
 		
-		# Add stage to the scene tree
-		get_parent().add_child(current_stage_instance)
+		# Add stage to the scene tree (add as child of StageManager)
+		add_child(current_stage_instance)
 		
 		# Connect stage completion signal
 		if current_stage_instance.has_signal("stage_completed_signal"):

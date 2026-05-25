@@ -58,13 +58,12 @@ func shoot_at_player():
 			bullet.get_node("AnimatedSprite2D").rotation = angle
 
 func take_damage():
-	print("Turret destroyed!")
-	# Play explosion effect
+	var game = get_tree().get_first_node_in_group("game_node")
+	if game and game.has_method("enemy_killed"):
+		game.enemy_killed("turret", global_position)
 	var explosion = explosion_scene.instantiate()
 	get_parent().add_child(explosion)
 	explosion.global_position = global_position
-	
-	# Remove the turret
 	queue_free()
 
 func _on_body_entered(body):

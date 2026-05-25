@@ -92,4 +92,7 @@ func cleanup_stage():
 			if is_instance_valid(child):
 				child.queue_free()
 
-signal stage_completed_signal 
+signal stage_completed_signal
+
+func boss_defeated():
+	complete_stage()

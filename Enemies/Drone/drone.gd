@@ -96,15 +96,14 @@ func turn_around():
 	direction *= -1
 
 func take_damage():
-	print("Drone destroyed!")
-	# Play explosion effect if available
+	var game = get_tree().get_first_node_in_group("game_node")
+	if game and game.has_method("enemy_killed"):
+		game.enemy_killed("drone", global_position)
 	var explosion_scene = preload("res://VFX/explosion.tscn")
 	if explosion_scene:
 		var explosion = explosion_scene.instantiate()
 		get_parent().add_child(explosion)
 		explosion.global_position = global_position
-	
-	# Remove the drone
 	queue_free()
 
 func _on_body_entered(body):
